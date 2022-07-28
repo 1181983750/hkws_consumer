@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="5aeef554-1545-4005-b769-6ec98753d80f" name="变更" comment="未知 bug 修复">
+      <change beforePath="$PROJECT_DIR$/.idea/httpxs.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/httpxs.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MachineLogging.py" beforeDir="false" afterPath="$PROJECT_DIR$/MachineLogging.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MachinePublic.py" beforeDir="false" afterPath="$PROJECT_DIR$/MachinePublic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/httpAsyncClient/Config.py" beforeDir="false" afterPath="$PROJECT_DIR$/httpAsyncClient/Config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/httpAsyncClient/hkws_xf_xfmx/HKWSXFMXORM.py" beforeDir="false" afterPath="$PROJECT_DIR$/httpAsyncClient/hkws_xf_xfmx/HKWSXFMXORM.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/httpAsyncClient/hkws_yg_sbqy/HKWSYGSBQYORM.py" beforeDir="false" afterPath="$PROJECT_DIR$/httpAsyncClient/hkws_yg_sbqy/HKWSYGSBQYORM.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/httpxs/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/httpxs/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pid.txt" beforeDir="false" afterPath="$PROJECT_DIR$/pid.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/middleware/LogMiddleware.py" beforeDir="false" afterPath="$PROJECT_DIR$/public/middleware/LogMiddleware.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/middleware/user_auth_middleware.py" beforeDir="false" afterPath="$PROJECT_DIR$/public/middleware/user_auth_middleware.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/utils/sqlserver.py" beforeDir="false" afterPath="$PROJECT_DIR$/public/utils/sqlserver.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static_files/images/1210.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/static_files/images/199811.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/static_files/logs/MachineLog.log" beforeDir="false" afterPath="$PROJECT_DIR$/static_files/logs/MachineLog.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static_files/xf/199811童羿诚-525.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/static_files/xf/199811童羿诚-526.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/static_files/xf/199811童羿诚-527.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/static_files/xf/199811童羿诚-531.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/static_files/xf/199811童羿诚-532.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/static_files/xf/199811童羿诚-533.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/static_files/xf/199811童羿诚-534.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/static_files/xf/199811童羿诚-536.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/static_files/xf/199811童羿诚-537.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/static_files/xf/199811童羿诚-540.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/static_files/xf/199811童羿诚-543.jpg" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="ProjectErrors" />
+  </component>
+  <component name="ProjectId" id="2BKEWc9tGeIFnu6hs3BbBgwVIAQ" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/httpAsyncClient" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\httpxs\httpAsyncClient" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\httpxs\httpAsyncClient" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.MachinePublic">
+    <configuration name="MachinePublic" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="httpxs" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/MachinePublic.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="kill_pid" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="httpxs" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/kill_pid.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="manage" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="httpxs" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/manage.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="httpxs" type="Python.DjangoServer" factoryName="Django server">
+      <module name="httpxs" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="DJANGO_SETTINGS_MODULE" value="httpxs.settings" />
+      </envs>
+      <option name="SDK_HOME" value="E:\httpxs\venv\Scripts\python.exe" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <option name="port" value="8001" />
+      <option name="host" value="172.17.18.203" />
+      <option name="additionalOptions" value="" />
+      <option name="browserUrl" value="" />
+      <option name="runTestServer" value="false" />
+      <option name="runNoReload" value="false" />
+      <option name="useCustomRunCommand" value="false" />
+      <option name="customRunCommand" value="" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Django 服务器.httpxs" />
+      <item itemvalue="Python.kill_pid" />
+      <item itemvalue="Python.MachinePublic" />
+      <item itemvalue="Python.manage" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.MachinePublic" />
+        <item itemvalue="Python.kill_pid" />
+        <item itemvalue="Python.manage" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="5aeef554-1545-4005-b769-6ec98753d80f" name="变更" comment="" />
+      <created>1656646411512</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1656646411512</updated>
+      <workItem from="1656646413136" duration="63000" />
+      <workItem from="1656646563653" duration="3624000" />
+      <workItem from="1656654199911" duration="15015000" />
+      <workItem from="1656913328061" duration="4108000" />
+      <workItem from="1656926732507" duration="3095000" />
+      <workItem from="1656992712281" duration="231000" />
+      <workItem from="1657072246829" duration="723000" />
+      <workItem from="1657072988073" duration="2353000" />
+      <workItem from="1657246707239" duration="16000" />
+      <workItem from="1657675893296" duration="60000" />
+      <workItem from="1657857955136" duration="2802000" />
+      <workItem from="1657877393291" duration="4125000" />
+    </task>
+    <task id="LOCAL-00001" summary="未知 bug 修复">
+      <created>1656656943261</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1656656943261</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="未知 bug 修复" />
+    <option name="LAST_COMMIT_MESSAGE" value="未知 bug 修复" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/httpAsyncClient/imageUpload_COPY/views.py</url>
+          <line>8</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/httpxs$manage.coverage" NAME="manage 覆盖结果" MODIFIED="1656654564643" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/httpxs$kill_pid.coverage" NAME="kill_pid 覆盖结果" MODIFIED="1656895377923" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/httpxs$MachinePublic.coverage" NAME="MachinePublic 覆盖结果" MODIFIED="1657877423800" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>
