@@ -655,7 +655,6 @@ class MachineThread:
             # 防止每次初始化
             self.__class__._first_init = False
 
-    # classmethod确保被装饰的方法可以不实例化 直接调用
     @classmethod
     def get_instance(cls):
         """
@@ -770,7 +769,7 @@ class MachineThread:
         """
         activate_machines = []
         for machine in self.sbinfo:
-            if self.sbinfo[machine]['query_obj']['ty'] == False:
+            if self.sbinfo[machine]['query_obj']['ty'] is False:
                 activate_machines.append({machine: self.sbinfo[machine]})
         return activate_machines
 
