@@ -20,7 +20,11 @@ from rest_framework.settings import APISettings
 from httpAsyncClient.Config import Config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+<<<<<<< HEAD
 print(BASE_DIR)
+=======
+print('项目路径', BASE_DIR)
+>>>>>>> master
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -29,7 +33,11 @@ SECRET_KEY = 'django-insecure-ky&&(bc%7n9@xu&swf*9&gyvarnv(s+c=v9hw&3l&#*c5sm-a$
 CG_ERP_KEY = 'django-insecure-i)!0q8znw@7vo6ed9c@5@vb^-fm+f2-n)36q2jsk+*2q!iv4j-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+<<<<<<< HEAD
 DEBUG = True
+=======
+DEBUG = False
+>>>>>>> master
 
 ALLOWED_HOSTS = ['*']
 
@@ -86,6 +94,16 @@ WSGI_APPLICATION = 'httpxs.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+<<<<<<< HEAD
+=======
+# 使用连接池
+DATABASE_POOL_ARGS = {
+    "max_overflow": 20,  # 连接池中可以创建的最大连接数
+    "pool_size": 5,  # 连接池中保持的最小连接数
+    "recycle": 300,  # 连接池中连接的最大生存时间
+}
+
+>>>>>>> master
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',  # 数据库引擎设置
@@ -95,9 +113,39 @@ DATABASES = {
         'HOST': '172.17.18.110',  # 数据库主机地址
         'PORT': 1433,  # 数据库端口号，默认可以不写 写了连不上....???
         'OPTIONS': {
+<<<<<<< HEAD
             'driver': 'SQL Server Native Client 11.0',
         },
     },
+=======
+            'driver': 'ODBC Driver 17 for SQL Server',
+        },
+        "POOL_ARGS": DATABASE_POOL_ARGS,
+    },
+    # 'default': {
+    #     'ENGINE': 'mssql',  # 数据库引擎设置
+    #     'NAME': 'cgyypt',  # 要连接的数据库名
+    #     'USER': 'sa',  # 数据库用户名
+    #     'PASSWORD': 'ERPsqlpassword@20220409.',  # 数据库密码
+    #     'HOST': '192.168.50.165',  # 数据库主机地址
+    #     'PORT': 1433,  # 数据库端口号，默认可以不写 写了连不上....???
+    #     'OPTIONS': {
+    #         'driver': 'ODBC Driver 17 for SQL Server',
+    #     },
+    # },
+
+    # 'default': {
+    #         'ENGINE': 'mssql',  # 数据库引擎设置
+    #         'NAME': 'cgyypt',  # 要连接的数据库名
+    #         'USER': 'sa',  # 数据库用户名
+    #         'PASSWORD': 'Yun8password@159...',  # 数据库密码
+    #         'HOST': '172.17.1.2',  # 数据库主机地址
+    #         'PORT': 1433,  # 数据库端口号，默认可以不写 写了连不上....???
+    #         'OPTIONS': {
+    #             'driver': 'SQL Server Native Client 11.0',
+    #         },
+    #     },
+>>>>>>> master
 }
 
 # Password validation
@@ -118,7 +166,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 USER_SETTINGS = getattr(settings, 'JWT_AUTH', None)
 
 DEFAULTS = {
@@ -152,10 +203,15 @@ DEFAULTS = {
 
 api_settings = APISettings(USER_SETTINGS, DEFAULTS)
 
+<<<<<<< HEAD
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 单位为字节数， 10485760值为10M
 
 
+=======
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 单位为字节数， 10485760值为10M
+
+>>>>>>> master
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -178,6 +234,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_URL = 'static/'
 
+<<<<<<< HEAD
 #上传的文件存放目录位置
 MEDIA_ROOT = os.path.join(BASE_DIR,'static_files/')
 #页面访问根路径 相当于 http://127.0.0.1:8000/static_files/
@@ -248,3 +305,104 @@ MEDIA_URL = "static_files/"
 #         }
 #     }
 # }
+=======
+# 上传的文件存放目录位置
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static_files/')
+# 页面访问根路径 相当于 http://127.0.0.1:8000/static_files/
+MEDIA_URL = "static_files/"
+
+import concurrent_log_handler
+
+log_path = os.path.join(BASE_DIR, "static_files/logs/nohup.log")
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        # 详细
+        'verbose': {
+            #            错误等级　　　　错误时间戳　　错误魔抗　　　错误行　　错误信息
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        # 简单
+        'simple': {
+            'format': '%(levelname)s:(%(asctime)s:%(module)s: %(filename)s:%(lineno)d):%(message)s'
+        },
+        # 错误日志格式
+        'err_info': {
+            'format': '%(levelname)s:(%(asctime)s:%(module)s: %(filename)s:%(lineno)d):%(message)s'
+        }
+    },
+    # 日志过滤器
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'console': {
+            #   过滤错误模式
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'file': {
+            # 记录日志的错误等级
+            'level': 'INFO',
+            # logging.handlers.RotatingFileHandler
+            'class': 'concurrent_log_handler.ConcurrentRotatingFileHandler',
+            # 日志位置,日志文件名,日志保存目录必须手动创建
+            'filename': log_path,
+            # 日志文件的最大值,这里我们设置10M
+            'maxBytes': 10 * 1024 * 1024,
+            # 日志文件的数量,设置最大日志数量为20
+            'backupCount': 10,
+            # 日志格式:详细格式
+            'formatter': 'verbose'
+        },
+        # 输出info日志
+        'info': {
+            'level': 'INFO',
+            'class': 'concurrent_log_handler.ConcurrentRotatingFileHandler',
+            'filename': log_path,
+            # 100mb
+            'maxBytes': 100 * 1024 * 1024,
+            'backupCount': 10,
+            'formatter': 'verbose',  # 'standard',
+            'encoding': 'utf-8',  # 设置默认编码
+        },
+        # 专门用来记错误日志
+        'error': {
+            'level': 'DEBUG',
+            'class': 'concurrent_log_handler.ConcurrentRotatingFileHandler',  # 保存到文件，自动切
+            'filters': ['require_debug_false'],
+            'filename': log_path,  # 日志文件
+            'maxBytes': 1024 * 1024 * 50,  # 日志大小 50M
+            'backupCount': 10,
+            'formatter': 'err_info',
+            'encoding': 'utf-8',
+        },
+    },
+    # 日志对象
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file', 'error'],  #
+            'propagate': True,  # 是否让日志信息继续冒泡给其他的日志处理系统，一般为Ture ,不保证其他第三方模块有记录
+        },
+        'log': {
+            'handlers': ['info', 'console'],
+            'level': 'INFO',
+            'propagate': True
+        },
+        'error': {
+            'handlers': ['console', 'file', 'error'],
+            'level': 'DEBUG',
+            'propagate': True
+        },
+    }
+}
+>>>>>>> master

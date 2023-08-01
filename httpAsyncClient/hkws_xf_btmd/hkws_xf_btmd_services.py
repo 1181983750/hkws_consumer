@@ -25,8 +25,12 @@ class HKWSXFBTServices(BaseService):
         self.xfmx_service = HKWSXFMXServices(model=hkws_xf_xfmx)
         self.ygye_orm = HKWSXFYGYEORM(model=hkws_xf_ygye)
 
+<<<<<<< HEAD
 
     def add_batch_subsidy(self, data_dict: dict, serializer:Type[ModelSerializer] = None):
+=======
+    def add_batch_subsidy(self, data_dict: dict, serializer: Type[ModelSerializer] = None):
+>>>>>>> master
         """
         增加 批量补贴 类型6
         :param data_dict:   ygid, amount, bz 必填
@@ -49,7 +53,11 @@ class HKWSXFBTServices(BaseService):
             return ResponseResult(msg='批量补贴增加失败', data={"ygid": data_dict['ygid'], "btje": data_dict['amount']})
         return ResponseResult(msg='批量补贴增加成功', code=1, data={"ygid": data_dict['ygid'], "btje": data_dict['amount']})
 
+<<<<<<< HEAD
     def del_batch_subsidy(self, data_dict: dict, serializer:Type[ModelSerializer] = None):
+=======
+    def del_batch_subsidy(self, data_dict: dict, serializer: Type[ModelSerializer] = None):
+>>>>>>> master
         """
         删除 批量补贴 类型6
         :param data_dict:   ygid 必填
@@ -59,7 +67,11 @@ class HKWSXFBTServices(BaseService):
         assert self.orm.del_batch_btmd_by_ygid(data_dict['ygid'])
         return ResponseResult(msg='删除批量补贴成功', code=1)
 
+<<<<<<< HEAD
     def sel_batch_subsidy(self, queryString: Union[str, int], serializer:Type[ModelSerializer] = None):
+=======
+    def sel_batch_subsidy(self, queryString: Union[str, int], serializer: Type[ModelSerializer] = None):
+>>>>>>> master
         """
         通过条件搜索批量补贴名单
         :param queryString:
@@ -70,7 +82,11 @@ class HKWSXFBTServices(BaseService):
         data_list = [dict(zip(column_list, row)) for row in result_set]
         return ResponseResult(msg='查询批量补贴成功', code=1, data=data_list)
 
+<<<<<<< HEAD
     def sel_batch_subsidy_by_month(self, month: Union[str, int], serializer:Type[ModelSerializer] = None):
+=======
+    def sel_batch_subsidy_by_month(self, month: Union[str, int], serializer: Type[ModelSerializer] = None):
+>>>>>>> master
         """
         通过条件搜索批量补贴名单
         :param queryString:
@@ -81,7 +97,11 @@ class HKWSXFBTServices(BaseService):
         data_list = [dict(zip(column_list, row)) for row in result_set]
         return ResponseResult(msg='查询批量补贴成功', code=1, data=data_list)
 
+<<<<<<< HEAD
     def update_batch_subsidy(self, data_dict: dict, serializer:Type[ModelSerializer] = None):
+=======
+    def update_batch_subsidy(self, data_dict: dict, serializer: Type[ModelSerializer] = None):
+>>>>>>> master
         """
         修改批量补贴名单
         :param data_dict:
@@ -116,13 +136,21 @@ class HKWSXFBTServices(BaseService):
             if btje >= 0:
                 result = self.xfmx_orm.get_month_bt_gt_xfje_by_ygid(ygid=ygid, month=now_month)
                 if result:
+<<<<<<< HEAD
                     return ResponseResult("员工代码：" + ygdm + ygmc + "已经存在正数补贴,请检查当月补贴是否已经执行")
+=======
+                    return ResponseResult("id" + ygid + "员工代码：" + ygdm + ygmc + "已经存在正数补贴,请检查当月补贴是否已经执行")
+>>>>>>> master
                 else:
                     result = self.xfmx_orm.get_month_bt_lt_xfje_by_ygid(ygid=ygid, month=now_month)
                     if result:
                         return ResponseResult("员工代码：" + ygdm + ygmc + "已经存在负数补贴,请检查当月补贴是否已经执行")
             elif btje < 0:
+<<<<<<< HEAD
                 ye = self.xfmx_service.auto_calc_xfmx_ye(ygid=ygid, amount=abs(btje), xflx=2) #检查员工余额是否够扣款
+=======
+                ye = self.xfmx_service.auto_calc_xfmx_ye(ygid=ygid, amount=abs(btje), xflx=2)  # 检查员工余额是否够扣款
+>>>>>>> master
                 if ye < 0:
                     return ResponseResult("员工代码：" + ygdm + ygmc + "的余额扣减之后为负数。请检查数据是否正确")
         success_list = []

@@ -1,0 +1,19 @@
+2022-10-14 13:04:56,286 - LogMiddleware.py[line:31] - INFO - ************************************************* 下面是新的一条日志 ***************************************************
+2022-10-14 13:04:56,286 - LogMiddleware.py[line:33] - INFO - 拦截请求的地址：/User/getNoFaceYgxx/；请求的方法：GET
+2022-10-14 13:04:56,286 - LogMiddleware.py[line:34] - INFO - ==================================== headers 头信息 ====================================================
+2022-10-14 13:04:56,286 - LogMiddleware.py[line:37] - DEBUG - HTTP_AUTHORIZATION Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MjA0OTAsImV4cCI6MTY2NTk4MjcxNX0.7-27O2r6gdRGXOKzbHZQNeh5IRAC8gUKTEggpaHqo-k
+2022-10-14 13:04:56,286 - LogMiddleware.py[line:37] - DEBUG - HTTP_USER_AGENT PostmanRuntime/7.29.2
+2022-10-14 13:04:56,286 - LogMiddleware.py[line:37] - DEBUG - HTTP_ACCEPT */*
+2022-10-14 13:04:56,287 - LogMiddleware.py[line:37] - DEBUG - HTTP_POSTMAN_TOKEN 3f62f049-3d02-4103-adb0-fb3a5aa63269
+2022-10-14 13:04:56,287 - LogMiddleware.py[line:37] - DEBUG - HTTP_HOST 172.17.18.203:8001
+2022-10-14 13:04:56,287 - LogMiddleware.py[line:37] - DEBUG - HTTP_ACCEPT_ENCODING gzip, deflate, br
+2022-10-14 13:04:56,287 - LogMiddleware.py[line:37] - DEBUG - HTTP_CONNECTION keep-alive
+2022-10-14 13:04:56,287 - LogMiddleware.py[line:38] - INFO - 代理IP：172.17.18.203
+2022-10-14 13:04:56,287 - LogMiddleware.py[line:39] - INFO - 真实IP：None
+2022-10-14 13:04:56,287 - LogMiddleware.py[line:40] - INFO - ==================================== request body信息 ==================================================
+2022-10-14 13:04:56,287 - LogMiddleware.py[line:42] - INFO - params参数：<QueryDict: {}>
+2022-10-14 13:04:56,287 - LogMiddleware.py[line:46] - INFO - body参数：b''
+2022-10-14 13:04:56,287 - LogMiddleware.py[line:49] - INFO - ================================== View视图函数内部信息 ================================================
+2022-10-14 13:04:56,290 - LogMiddleware.py[line:71] - ERROR - >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>      正常的日志       <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+2022-10-14 13:04:56,290 - LogMiddleware.py[line:72] - ERROR - /User/getNoFaceYgxx/
+2022-10-14 13:04:56,290 - LogMiddleware.py[line:73] - ERROR - >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>      正常日志结束       <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<

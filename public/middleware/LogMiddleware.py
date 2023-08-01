@@ -58,7 +58,14 @@ class LogMiddleware(MiddlewareMixin):
         return JsonResponse({"message": "出现了无法预料的view视图错误：%s" % exception.__str__(), "code": -1, "data": {}})
 
     def process_response(self, request, response):
+<<<<<<< HEAD
         rd = json.loads(response.content.decode())
+=======
+        try:
+            rd = json.loads(response.content.decode())
+        except:
+            rd = response.content
+>>>>>>> master
         if type(response) == JsonResponse:
             if type(rd) == dict and (rd.get('code') and rd.get('code') != 1):
                 logger.error('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>      出现异常的日志       <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<')

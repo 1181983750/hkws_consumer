@@ -23,7 +23,10 @@ class HKWSXFMXServices(BaseService):
         self.orm = HKWSXFMXORM(model=model)
         self.ygye_orm = HKWSXFYGYEORM(model=hkws_xf_ygye)
 
+<<<<<<< HEAD
     @transaction.atomic
+=======
+>>>>>>> master
     def auto_calc_xfmx_ye(self, ygid: Union[int, str], amount: Union[Decimal], xflx: int) -> Decimal:
         """
         通过传入员工id 消费或充值金额  操作类型1充值、3单补、4消费退款、6群补：加运算  2消费、5现金退款：减运算  计算当前余额
@@ -31,7 +34,10 @@ class HKWSXFMXServices(BaseService):
         :param xfje:
         :return: 当前余额
         """
+<<<<<<< HEAD
         threading.Lock()
+=======
+>>>>>>> master
         query: hkws_xf_ygye = self.ygye_orm.get_ye_by_ygid(ygid)
         if not query.id:
             try:
@@ -48,6 +54,10 @@ class HKWSXFMXServices(BaseService):
             ye = query.ye - amount
         return ye
 
+<<<<<<< HEAD
+=======
+    @transaction.atomic
+>>>>>>> master
     def add_money(self, data_dict: dict, serializer: Type[ModelSerializer] = None):
         """
         充值金额
@@ -78,12 +88,16 @@ class HKWSXFMXServices(BaseService):
         # 自动计算更新所剩余额并保存
         result = self.auto_calc_xfmx_ye(ygid=data_dict['ygid'], amount=data_dict['amount'], xflx=data_dict['xflx'])
         hkws_xf_xfmx_model.ye = result
+<<<<<<< HEAD
         sid = transaction.savepoint()  # 开启事务设置事务保存点 可以设置多个保存点
+=======
+>>>>>>> master
         try:
             hkws_xf_xfmx_model.sjrq = getBeijinTime()[1]
             self.orm.add(hkws_xf_xfmx_model)
         except Exception:
             traceback.print_exc()
+<<<<<<< HEAD
             transaction.savepoint_rollback(sid)  # 失败回滚事务(如果数据库操作发生异常，回滚到设置的事务保存点)
             return ResponseResult(msg='充值失败', data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']})
         else:
@@ -99,6 +113,15 @@ class HKWSXFMXServices(BaseService):
                 return ResponseResult(msg='充值失败,操作频繁', data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']})
         return ResponseResult(msg='充值成功', data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']}, code=1)
 
+=======
+            return ResponseResult(msg='充值失败', data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']})
+        else:
+            assert self.ygye_orm.update_ygye(ygid=data_dict['ygid'], ye=result)
+
+        return ResponseResult(msg='充值成功', data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']}, code=1)
+
+    @transaction.atomic
+>>>>>>> master
     def deduction_money(self, data_dict: dict, serializer: Type[ModelSerializer] = None):
         """
         扣款
@@ -123,6 +146,7 @@ class HKWSXFMXServices(BaseService):
             self.orm.add(hkws_xf_xfmx_model)
         except Exception as e:
             traceback.print_exc()
+<<<<<<< HEAD
             transaction.savepoint_rollback(sid)  # 失败回滚事务(如果数据库操作发生异常，回滚到设置的事务保存点)
             return ResponseResult(msg='扣款失败', data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']})
         else:
@@ -136,6 +160,14 @@ class HKWSXFMXServices(BaseService):
                 return ResponseResult(msg='扣款失败，操作频繁', data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']})
         return ResponseResult(msg='扣费成功', data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']}, code=1)
 
+=======
+            return ResponseResult(msg='扣款失败', data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']})
+        else:
+            assert self.ygye_orm.update_ygye(ygid=data_dict['ygid'], ye=result)
+        return ResponseResult(msg='扣费成功', data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']}, code=1)
+
+    @transaction.atomic
+>>>>>>> master
     def refund_money(self, data_dict: dict, serializer: Type[ModelSerializer] = None):
         """
         退款 包括离职现金退款和 直接退现金    5
@@ -150,7 +182,10 @@ class HKWSXFMXServices(BaseService):
         hkws_xf_xfmx_model.xfje = -data_dict['amount']  #退款金额 存负数
         # 自动计算更新所剩余额并没有就新建员工保存
         result = self.auto_calc_xfmx_ye(ygid=data_dict['ygid'], amount=data_dict['amount'], xflx=data_dict['xflx'])
+<<<<<<< HEAD
         sid = transaction.savepoint()  # 开启事务设置事务保存点 可以设置多个保存点
+=======
+>>>>>>> master
         if result < 0:
             return ResponseResult(msg='退款失败,余额不足', data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']})
         try:
@@ -159,6 +194,7 @@ class HKWSXFMXServices(BaseService):
             self.orm.add(hkws_xf_xfmx_model)
         except Exception as e:
             traceback.print_exc()
+<<<<<<< HEAD
             transaction.savepoint_rollback(sid)  # 失败回滚事务(如果数据库操作发生异常，回滚到设置的事务保存点)
             return ResponseResult(msg='退款失败', data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']})
         else:
@@ -172,6 +208,14 @@ class HKWSXFMXServices(BaseService):
                 transaction.savepoint_rollback(sid)  # 失败回滚事务(如果数据库操作发生异常，回滚到设置的事务保存点
         return ResponseResult(msg='退款成功', data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']},code=1)
 
+=======
+            return ResponseResult(msg='退款失败', data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']})
+        else:
+            assert self.ygye_orm.update_ygye(ygid=data_dict['ygid'], ye=result)
+        return ResponseResult(msg='退款成功', data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']},code=1)
+
+    @transaction.atomic
+>>>>>>> master
     def subsidy_money(self, data_dict: dict, serializer: Type[ModelSerializer] = None):
         """
         员工补贴  sfbt1          3单人补贴
@@ -185,12 +229,20 @@ class HKWSXFMXServices(BaseService):
         if data_dict['amount'] > 0:
             # 查询当月是否有正数的补贴
             gt_btmx = self.orm.get_month_bt_gt_xfje_by_ygid(data_dict['ygid'],  now.month)
+<<<<<<< HEAD
             if gt_btmx.count() > 0:
+=======
+            if gt_btmx.count() >= 2:
+>>>>>>> master
                 return ResponseResult(msg="该员工本月已经存在正数补贴,请检查当月补贴是否已经执行")
         else:
             # 查询当月是否有负数的补贴
             lt_btmx = self.orm.get_month_bt_lt_xfje_by_ygid(data_dict['ygid'],  now.month)
+<<<<<<< HEAD
             if lt_btmx.count() > 0:
+=======
+            if lt_btmx.count() >= 2:
+>>>>>>> master
                 return ResponseResult(msg="该员工本月已经存在负数补贴,请检查当月补贴是否已经执行")
             # 如果不存在补贴 再计算下负数补贴后余额会不会是负数  此时amount为负数 ygye + -amount
             result = self.auto_calc_xfmx_ye(data_dict['ygid'], data_dict['amount'], xflx=data_dict['xflx'])
@@ -238,6 +290,20 @@ class HKWSXFMXServices(BaseService):
         data_list = [dict(zip(column_list, row)) for row in result_set]
         return ResponseResult(msg='查询成功', code=1, data=data_list)
 
+<<<<<<< HEAD
+=======
+    def get_czmx_by_rangeDate(self, data_dict: dict, serializer: Type[ModelSerializer] = None):
+        """
+        根据日期范围 查询 充值明细 1
+        :param data_dict: dateStart、dateEnd 必填 queryString可选
+        :param serializer: 可选
+        :return:
+        """
+        result_set, column_list = self.orm.getDaysCountCZmx(data_dict['dateStart'], data_dict['dateEnd'])
+        data_list = [dict(zip(column_list, row)) for row in result_set]
+        return ResponseResult(msg='查询成功', code=1, data=data_list)
+
+>>>>>>> master
     def get_tkmx(self, data_dict: dict, serializer: Type[ModelSerializer] = None):
         """
         员工根据搜索条件 和日期范围 查询 退款明细  4 or 5

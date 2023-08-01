@@ -64,6 +64,10 @@ def datetime_format(func):
                     data.update(dateStart=now.date().strftime('%Y/%m/%d') + " 00:00:00")
             else:
                 data.update(dateStart=data['dateStart'].strip() + " 00:00:00.000")
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
         if data.get('dateEnd') and pattern.search(data.get('dateEnd')):
             try:
                 datetime.datetime.strptime(data.get('dateEnd', 'null'), '%Y-%m-%d %H:%M:%S')

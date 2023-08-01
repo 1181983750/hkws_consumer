@@ -4,6 +4,10 @@ import jwt
 from django.http import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 
+<<<<<<< HEAD
+=======
+from httpAsyncClient.models import hkws_xf_user
+>>>>>>> master
 from httpxs.settings import CG_ERP_KEY, api_settings
 
 def jwt_decode_handler(token):
@@ -64,5 +68,13 @@ class TokenAuthMiddleware(MiddlewareMixin):
             except jwt.InvalidTokenError as e:
                 return JsonResponse({"message": "出现了无法预料的view视图错误：%s" % e, "code": -1, "data": {}})
             info.update(username=info['id'])
+<<<<<<< HEAD
             print(info)
             request.info = info
+=======
+            qx_query = hkws_xf_user.objects.filter(username=info.get('username'))
+            if not qx_query:
+                return JsonResponse({"message": "你没有该权限", "code": -1, "data": {}})
+            request.info = info
+
+>>>>>>> master

@@ -12,7 +12,11 @@ class UPLOADORM(BaseORM):
         super(UPLOADORM, self).__init__(model=model)
         self.model = model
 
+<<<<<<< HEAD
     def compressPicForScale(self,picpath: str, desFileSize: int=200, filename: str=None):
+=======
+    def compressPicForScale(self, picpath: str, desFileSize: int = 200, filename: str = None):
+>>>>>>> master
         """
         压缩图片到200kb
         :param picpath: 必传 路径地址
@@ -40,6 +44,9 @@ class UPLOADORM(BaseORM):
         # img.save(picpath, quality=5)
         img.save(picpath)
         img.close()
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> master

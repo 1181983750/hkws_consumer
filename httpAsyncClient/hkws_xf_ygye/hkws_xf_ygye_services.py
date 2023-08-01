@@ -1,5 +1,9 @@
 import copy
+<<<<<<< HEAD
 from decimal import Decimal
+=======
+from decimal import Decimal, getcontext
+>>>>>>> master
 from typing import Type, Union
 
 from django.db.models import QuerySet

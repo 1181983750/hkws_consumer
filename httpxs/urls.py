@@ -25,4 +25,8 @@ urlpatterns = [
     path('BatchSubsidy/', include(BatchSubsidyurls)), #All POST 批量补贴总路由
     path('image/', include(imageurls)),  # All POST 图片处理
     # path('Celery/', include(Celery_urls)) # 定时任务
+<<<<<<< HEAD
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+=======
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+>>>>>>> master

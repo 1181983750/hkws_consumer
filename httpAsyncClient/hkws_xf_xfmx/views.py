@@ -1,7 +1,11 @@
 import datetime
 from decimal import Decimal
 
+<<<<<<< HEAD
 from django.db import transaction
+=======
+
+>>>>>>> master
 from django.http import JsonResponse
 from rest_framework.views import APIView
 
@@ -9,7 +13,11 @@ from httpAsyncClient.hkws_xf_xfmx.hkws_xf_xfmx_services import HKWSXFMXServices
 from httpAsyncClient.models import hkws_xf_xfmx
 from httpAsyncClient.serializers import hkws_xf_xfmxModelSerializer
 from public.utils import EmployeesToBanlanceConstruction as EC
+<<<<<<< HEAD
 from public.utils.publicWrapper import datetime_format, nonce_valid
+=======
+from public.utils.publicWrapper import datetime_format
+>>>>>>> master
 from public.utils.response_result import ResponseResult
 from public.utils.standard import CheckException, Standard
 
@@ -21,7 +29,10 @@ class HKWSXFMXView(APIView, Standard):
         self.nonce = ''
 
     # 主方法
+<<<<<<< HEAD
     @transaction.atomic
+=======
+>>>>>>> master
     def post(self, request):
         print('访问的path:', request.path)
         if request.path == '/Recharge/':
@@ -60,11 +71,22 @@ class HKWSXFMXView(APIView, Standard):
         elif request.path == '/Report/GetCzmxStatistics/':
             """获取 每日 充值 统计 情况"""
             return self.get_czmx_statistics(request)
+<<<<<<< HEAD
         return JsonResponse(ResponseResult(msg='此请求地址有误').__call__())
 
     # @nonce_valid
     def recharge(self, request):
         """这里开始是用工充值"""
+=======
+        elif request.path == '/Report/GetDaysCountCZmx/':
+            """根据 日期范围 统计充值明细 """
+            return self.getDaysCountCZmx(request)
+        return JsonResponse(ResponseResult(msg='此请求地址有误').__call__())
+
+    def recharge(self, request):
+        """这里开始是用工充值"""
+
+>>>>>>> master
         data: dict = request.data
         data.update({'sbip': request.META['REMOTE_ADDR']})
         data.update(czy=request.info.get('username', None))
@@ -160,6 +182,16 @@ class HKWSXFMXView(APIView, Standard):
         return JsonResponse(result_response.__call__())
 
     @datetime_format
+<<<<<<< HEAD
+=======
+    def getDaysCountCZmx(self, request):
+        """根据日期范围统计充值明细"""
+        data: dict = request.data
+        result_response = self.service.get_czmx_by_rangeDate(data, hkws_xf_xfmxModelSerializer)
+        return JsonResponse(result_response.__call__())
+
+    @datetime_format
+>>>>>>> master
     def get_tkmx_by_query(self, request):
         """根据搜索条件 和日期范围 查询 消费退款与现金退款"""
         data: dict = request.data

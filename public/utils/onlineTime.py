@@ -29,8 +29,13 @@ def getBeijinTime():
         #     beijintime_dict = {'year':time_tuple.tm_year,'month':time_tuple.tm_mon, 'day':time_tuple.tm_mday, 'hours':time_tuple.tm_hour, 'minute':time_tuple.tm_min, 'second':time_tuple.tm_sec, 'wday':time_tuple.tm_wday+1}
         #     print('获取网络日期',beijintime_str)
         #     return beijintime_dict, beijintime_str
+<<<<<<< HEAD
         beijintime_dict= {'year':now.year,'month':now.month, 'day':now.day, 'hours':now.hour, 'minute':now.minute, 'second':now.second, 'wday':now.weekday()+1}
         beijintime_str=f"{now.strftime('%Y-%m-%d ')}{now.time()}"
+=======
+        beijintime_dict = {'year':now.year,'month':now.month, 'day':now.day, 'hours':now.hour, 'minute':now.minute, 'second':now.second, 'wday':now.weekday()+1}
+        beijintime_str = f"{now.strftime('%Y-%m-%d ')}{now.time()}"
+>>>>>>> master
         return beijintime_dict, beijintime_str
     except:
         logging.exception("获取网络北京时间异常")

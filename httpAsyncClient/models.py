@@ -193,4 +193,25 @@ class hkws_xf_btmd(models.Model):
     class Meta:
         db_table = 'hkws_xf_btmd'
         verbose_name = '消费补贴名单'
+<<<<<<< HEAD
+=======
+        managed = False
+
+
+class hkws_xf_user(models.Model):
+    """
+[sm]
+    """
+    id = models.AutoField(primary_key=True)
+    username = models.CharField(db_column='username', max_length=50, blank=True, null=True, verbose_name='Null', )
+    password = models.CharField(db_column='password', max_length=50, blank=True, null=True, verbose_name='Null', )
+    salt = models.CharField(db_column='salt', max_length=50, blank=True, null=True, verbose_name='Null', )
+    disable = models.BooleanField(db_column='disable', blank=True, null=True, verbose_name='Null', default=False)
+    role = models.CharField(db_column='role', max_length=50, blank=True, null=True, verbose_name='Null', )
+    ygmc = models.CharField(db_column='ygmc', max_length=50, blank=True, null=True, verbose_name='Null', )
+
+    class Meta:
+        db_table = 'hkws_xf_user'
+        verbose_name = ''
+>>>>>>> master
         managed = False
