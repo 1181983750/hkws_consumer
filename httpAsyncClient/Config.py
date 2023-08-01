@@ -27,22 +27,18 @@ class Config:
     """
     全局可控 配置
     """
-    #脚本日志输出位置 文件名:
+    # 脚本日志输出位置 文件名:
     log_path = "static_files/logs/MachineLog.log"
 
-    #消费图片路径 注意 /结尾
+    # 消费图片路径 注意 /结尾
     xf_path = "static_files/xf/"
 
-    #人脸，上传、保存路径  注意 /结尾
+    # 人脸，上传、保存路径  注意 /结尾
     rl_path = "static_files/images/"
 
-    #下发人脸等 脚本运行检查轮询时间  单位 秒
+    # 下发人脸等 脚本运行检查轮询时间  单位 秒
     poll_time: int = 30
 
-    #下发人脸图片获取接口
-    # pic_url = "http://172.17.18.2:18080"
-    pic_url = "http://172.17.18.200:8008"
-
-
-
-
+    # 下发人脸图片获取接口
+    pic_url = "http://172.17.18.2:18080"
+    # pic_url = "http://172.17.18.200:8008"

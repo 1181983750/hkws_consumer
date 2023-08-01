@@ -160,12 +160,12 @@ class HKWSXFMXServices(BaseService):
         if data_dict['amount'] > 0:
             # 查询当月是否有正数的补贴
             gt_btmx = self.orm.get_month_bt_gt_xfje_by_ygid(data_dict['ygid'],  now.month)
-            if gt_btmx.count() > 0:
+            if gt_btmx.count() >= 2:
                 return ResponseResult(msg="该员工本月已经存在正数补贴,请检查当月补贴是否已经执行")
         else:
             # 查询当月是否有负数的补贴
             lt_btmx = self.orm.get_month_bt_lt_xfje_by_ygid(data_dict['ygid'],  now.month)
-            if lt_btmx.count() > 0:
+            if lt_btmx.count() >= 2:
                 return ResponseResult(msg="该员工本月已经存在负数补贴,请检查当月补贴是否已经执行")
             # 如果不存在补贴 再计算下负数补贴后余额会不会是负数  此时amount为负数 ygye + -amount
             result = self.auto_calc_xfmx_ye(data_dict['ygid'], data_dict['amount'], xflx=data_dict['xflx'])
@@ -210,6 +210,17 @@ class HKWSXFMXServices(BaseService):
         """
         result_set, column_list = self.orm.get_czmx_by_queryAndTime_Sql(data_dict['dateStart'], data_dict['dateEnd'],
                                                                         data_dict.get('queryString', None))
+        data_list = [dict(zip(column_list, row)) for row in result_set]
+        return ResponseResult(msg='查询成功', code=1, data=data_list)
+
+    def get_czmx_by_rangeDate(self, data_dict: dict, serializer: Type[ModelSerializer] = None):
+        """
+        根据日期范围 查询 充值明细 1
+        :param data_dict: dateStart、dateEnd 必填 queryString可选
+        :param serializer: 可选
+        :return:
+        """
+        result_set, column_list = self.orm.getDaysCountCZmx(data_dict['dateStart'], data_dict['dateEnd'])
         data_list = [dict(zip(column_list, row)) for row in result_set]
         return ResponseResult(msg='查询成功', code=1, data=data_list)
 

@@ -119,13 +119,13 @@ class HKWSYGSBQYORM(BaseORM):
         data_list = [dict(zip(column_list, row)) for row in result_set]
         return data_list
 
-    def get_xfmx_by_serialNo(self, serialNo: int) -> list:
+    def get_xfmx_by_serialNo(self, serialNo: int, ipAddress: str) -> list:
         """
         通过serialNo  消费机序列化获取所有消费明细
         :param serialNo:
         :return:
         """
-        sql = "select * from hkws_xf_xfmx where serialNo = %s" % serialNo
+        sql = "select * from hkws_xf_xfmx where serialNo = %s AND sbip='%s' " % (serialNo, ipAddress)
         result_set, column_list = self.sql_orm.query_data(sql)
         data_list = [dict(zip(column_list, row)) for row in result_set]
         return data_list

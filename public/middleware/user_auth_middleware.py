@@ -65,7 +65,6 @@ class TokenAuthMiddleware(MiddlewareMixin):
             except jwt.InvalidTokenError as e:
                 return JsonResponse({"message": "出现了无法预料的view视图错误：%s" % e, "code": -1, "data": {}})
             info.update(username=info['id'])
-            print(info)
             qx_query = hkws_xf_user.objects.filter(username=info.get('username'))
             if not qx_query:
                 return JsonResponse({"message": "你没有该权限", "code": -1, "data": {}})

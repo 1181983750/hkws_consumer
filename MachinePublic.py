@@ -1,5 +1,6 @@
 import logging
 import os
+import platform
 import traceback
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'httpxs.settings')
@@ -9,7 +10,7 @@ from public.utils.BaseOrm import DictToModel
 
 django.setup()
 
-from MachineLogging import logger
+logger = logging.getLogger('error')
 
 import datetime
 
@@ -77,10 +78,10 @@ class ParseData:
         # mode = detail.get('mode')
         refundPayment = detail.get('refundPayment')
         name = detail.get('name')
+        result_list = self.HKWSYGSBQYORM.get_xfmx_by_serialNo(int(serialNo), str(self.ip))
         if type == "refund":
             # 消费退款
             refundPayment = detail.get('refundPayment')
-            result_list = self.HKWSYGSBQYORM.get_xfmx_by_serialNo(int(serialNo))
             if not result_list:
                 response_refund = self.parse_transactionRecord(amount=Decimal(refundPayment) / Decimal(100),
                                                                Etype=EC.REFUND,
@@ -96,7 +97,6 @@ class ParseData:
                 response_refund = True
         if type == "transaction":
             actualPayment = detail.get('actualPayment')
-            result_list = self.HKWSYGSBQYORM.get_xfmx_by_serialNo(int(serialNo))
             if not result_list:
                 # 没有该serialNo记录 开始处理 消费
                 response_transaction = self.parse_transactionRecord(amount=Decimal(actualPayment) / Decimal(100),
@@ -118,8 +118,8 @@ class ParseData:
             response_t = self.http_x.put(f"http://{self.ip}/ISAPI/Consume/transactionRecordEventConfirm",
                                          auth=self.auth,
                                          params={'format': 'json'}, json=json_data_t)
-            print(f"交易确认回执{response_t.text}流水号:{serialNo}")
-            logging.warning(f"交易确认回执{response_t.text}流水号:{serialNo}")
+            # print(f"交易确认回执{response_t.text}流水号:{serialNo}")
+            logger.warning(f"交易确认回执{response_t.text}流水号:{serialNo}")
         if response_refund is not None:
             json_data_c = {'TransactionRecordEventConfirm': {}}
             json_data_c['TransactionRecordEventConfirm']['serialNo'] = int(serialNo)
@@ -127,7 +127,7 @@ class ParseData:
             response_c = self.http_x.put(f"http://{self.ip}/ISAPI/Consume/transactionRecordEventConfirm",
                                          auth=self.auth,
                                          params={'format': 'json'}, json=json_data_c)
-            logging.warning(f"退款确认回执{response_c.text}流水号:{serialNo}")
+            logger.warning(f"退款确认回执{response_c.text}流水号:{serialNo}")
 
     def handle_consumption_event(self, data: dict):
         # date_time = data.get('dateTime')
@@ -149,7 +149,7 @@ class ParseData:
             result = 'success'
         else:
             result = "balanceNotEnough"
-            # 小数点处理
+        # 小数点处理
         balanceBeforeDeduct = str(handel_ye).split(".")[0]
         # 处理完提交数据:
         json_data = {'ConsumptionEventConfirm': {}}
@@ -163,8 +163,8 @@ class ParseData:
 
         response = self.http_x.put(f"http://{self.ip}/ISAPI/Consume/consumptionEventConfirm", auth=self.auth,
                                    params={'format': 'json'}, json=json_data)
-        print(f'{serialNo}消费事件回执：{response.text}', )
-        logging.warning(f'{serialNo}消费事件回执：{response.text}', )
+        # print(f'{serialNo}消费事件回执：{response.text}', )
+        logger.warning(f'{serialNo}消费事件回执：{response.text}', )
 
     def parse_transactionRecord(self, amount: Decimal, Etype: EC, ygid: int, deviceInfo: dict, ygmc: str,
                                 xfrq: datetime.datetime, serialNo: int, verifyMode: str, username: str) -> bool:
@@ -243,7 +243,7 @@ class ParseData:
             elif b'Content-Type: image/jpeg' in da[start_index:start_content_length]:
                 self.content_type = 'IMAGE'
             else:
-                logging.warning('content_type未处理的格式')
+                logger.warning('content_type未处理的格式')
             content_length_temp = da[start_content_length:end_content_length]
 
             self.content_length = int(
@@ -279,21 +279,24 @@ class ParseData:
         if len(self.content) >= self.content_length:
             # 处理content
             if self.content_type == 'IMAGE':
-                self.fileinput(self.content, self.image_dict)
+                pass
+            # self.fileinput(self.content, self.image_dict)
             elif self.content_type == 'JSON':
+                logger.info(f'我是:{self.ip}')
                 # print(self.content)
                 # print(len(self.content))
                 de_json = json.loads(self.content.decode(encoding='utf-8'))
                 if de_json['eventType'] == 'videoloss':
-                    print('连接成功读取')
+                    pass
                 elif de_json['eventType'] == 'TransactionRecordEvent':
-                    print('交易事件确认', de_json)
+
                     self.image_dict = de_json
                     self.handle_transaction_event(de_json)
                 elif de_json['eventType'] == 'AccessControllerEvent':
-                    print('连接成功读取')
+                    pass
+                # print('访问控制器', de_json)
                 elif de_json['eventType'] == 'ConsumptionEvent':
-                    print('消费事件确认', de_json)
+
                     self.image_dict = de_json
                     self.handle_consumption_event(de_json)
                 elif de_json['eventType'] == 'ConsumptionQuery':
@@ -301,11 +304,11 @@ class ParseData:
                     self.handle_query_ye_event(de_json)
                 else:
                     print(f'其他json事件{de_json}')
-                    logging.warning(f'其他json事件{de_json}')
+                    logger.warning(f'其他json事件{de_json}')
             else:
                 de_json = json.loads(self.content.decode(encoding='utf-8'))
-                logging.warning(f'未处理的格式{de_json}')
-            print('*' * 100)
+                logger.warning(f'未处理的格式{de_json}')
+            #            print('*' * 100)
             # 处理content结束
 
             # 处理剩下的内容
@@ -316,7 +319,7 @@ class ParseData:
                 self.content_length = None
             else:
                 self.parse_data(da)
-            # 处理剩下的内容
+    # 处理剩下的内容
 
 
 class LongLink(threading.Thread):
@@ -349,22 +352,22 @@ class LongLink(threading.Thread):
                                     auth=self.http_x.DigestAuth(self.username, self.password),
                                     timeout=50) as r:
                 for data in r.iter_bytes():
-                    print("我是:", self.name)
                     self.parse_data.parse_data(data)
                     if self.parse_data.content_type is None:
                         if self.kill:
                             logger.warning('停止成功')
                             break
-                # 被动断网 保持重连
-                time.sleep(1)
                 self.reset_parse_data()
-                print('try try try 是否杀死', self.kill, )
+                print(self.ip, '# 被动断网 保持重连', self.kill, )
+                time.sleep(0.5)
                 if not self.kill:
-                    logger.warning('被动断网 即将重连')
                     self.run()
                 else:
                     del self.mt.threads[self.ids]['LongLink']
                     return '停止成功'
+        except RecursionError:
+            logger.info('重连次数超过递归最大限制，退出重启！！！！！！！！！！！！')
+            self.exit()
         except httpx.ReadTimeout:
             print('长时间未读取到数据')
             # 清空所有数据，退出线程并且清空在线设备容器
@@ -378,7 +381,7 @@ class LongLink(threading.Thread):
                 del self.mt.threads[self.ids]['LongLink']
                 return '停止成功'
         except Exception as e:
-            traceback.print_exc()
+            # traceback.print_exc()
             logger.warning(e)
             print('其他异常', str(e), self.ids, self.kill)
             time.sleep(1)
@@ -387,6 +390,7 @@ class LongLink(threading.Thread):
             if not self.kill:
                 logger.warning(f'{self.ip}异常 即将重连:{str(e), self.kill}')
                 self.run()
+
             else:
                 del self.mt.threads[self.ids]['LongLink']
                 return '停止成功'
@@ -397,6 +401,15 @@ class LongLink(threading.Thread):
         self.parse_data.content_type = None
         self.parse_data.content_length = None
 
+    @staticmethod
+    def exit():
+        pid = os.getpid()
+        sys_name = platform.system()
+        if sys_name == 'Windows':
+            os.system('taskkill /f /t /im {pid}'.format(pid=pid))
+        elif sys_name == 'Linux':
+            os.system('kill -9 {pid}'.format(pid=pid))
+
     def stop(self):
         # logger.warning('开始杀死该线程')
         self.kill = True
@@ -405,6 +418,7 @@ class LongLink(threading.Thread):
         """获得当前设备要下发的人脸下发到设备"""
         sbid: int = self.ids
         result: list = self.HKWSYGSBQYORM.sel_add_staff_bysbid(sbid)
+
         if not result:
             return
         try:
@@ -417,11 +431,12 @@ class LongLink(threading.Thread):
         except httpx.ReadTimeout:
             logger.warning(f"接口:{Config.pic_url}/login/获取token超时")
         except Exception as e:
-            print('获取token接口不对', e)
+            #            print('获取token接口不对', e)
             logger.warning('获取token接口不对')
         else:
             self.token = login_res.json().get("token", self.token)
         for item in result:
+            print("开始下发人脸")
             ygid = item.get("ygid")
             ygmc = item.get("ygmc")
             picpath = f'{Config.rl_path}{ygid}.jpg'
@@ -441,12 +456,11 @@ class LongLink(threading.Thread):
                         with open(picpath, "wb") as f:
                             f.write(img_res.text.encode(encoding='ISO-8859-1'))
                             f.close()
-            pic = None
             if f"{ygid}.jpg" in os.listdir(Config.rl_path):
                 pic = self.mt.getPicByPath(picpath)
                 if pic:
                     if self.handel_set_face_event(ygid, ygmc, pic):  # 无论成功都增加明细记录
-                        logger.warning(f"设备id：{sbid}下发成功的员工{ygid, ygmc}")
+                        logger.info(f"设备id：{sbid}下发成功的员工{ygid, ygmc}")
                         self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 1)
                     else:
                         logger.error(f"设备id：{sbid}下发失败的员工{ygid, ygmc}")
@@ -454,7 +468,9 @@ class LongLink(threading.Thread):
                         self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 0)
                     os.remove(f"{Config.rl_path}/{ygid}.jpg")
                 else:
-                    logger.error(f'{ygid, ygmc}有需要下发的人脸，但是获取不到图片')
+                    logger.error(f'{ygid, ygmc}有需要下发的人脸，但是获取不到图片设备id：{sbid}')
+            else:
+                print(f"{ygid - ygmc}.jpg not in Config.rl_path the {Config.rl_path}")
 
     def delStaff(self):
         """通过ygid删除人脸"""
@@ -463,7 +479,7 @@ class LongLink(threading.Thread):
         for item in result:
             ygid = item.get("ygid")
             if self.handel_del_face_event(ygid):  # 无论成功都增加明细记录
-                logger.warning(f"设备id：{sbid}删除成功的员工{ygid}")
+                logger.info(f"设备id：{sbid}删除成功的员工{ygid}")
                 self.HKWSYGSBQYORM.del_staff_record(ygid, sbid)
             else:
                 logger.error(f"设备id：{sbid}删除失败的员工{ygid}")
@@ -535,8 +551,8 @@ class LongLink(threading.Thread):
                                       headers=headers,
                                       timeout=self.timeout)
 
-        logger.warning(response.text)
-        print(response.text)
+        logger.info(response.text)
+        #        print(response.text)
         if response.text.find("user info proc success") != -1 and response.text.find("face proc success") != -1:
             return True
         return False
@@ -599,14 +615,17 @@ class LongLink(threading.Thread):
                   + "Content-Length: " + str(len(byte_pic)) + "\r\n\r\n" \
                   + byte_pic + "\r\n" \
                   + "--" + boundary + "--\r\n"
-        response = self.requests.post(f"http://{self.ip}/ISAPI/AccessControl/userInfoAndRight/setup?format=json",
-                                      auth=HTTPDigestAuth(self.username, self.password),
-                                      data=payload,
-                                      verify=False,
-                                      headers=headers,
-                                      timeout=5)
-        logger.warning(response.text)
-        print(response.text)
+        try:
+            response = self.requests.post(f"http://{self.ip}/ISAPI/AccessControl/userInfoAndRight/setup?format=json",
+                                          auth=HTTPDigestAuth(self.username, self.password),
+                                          data=payload,
+                                          verify=False,
+                                          headers=headers,
+                                          timeout=5)
+        except self.requests.ConnectTimeout:
+            return False
+        logger.info(response.text)
+        #        print(response.text)
         if response.text.find("\"deleteUser\": true,") != -1:
             return True
         return False
@@ -654,30 +673,39 @@ class MachineThread:
 
     def task_loop(self):
         """开启时先调用一次，后面按轮询时间来"""
-        time.sleep(Config.poll_time)
-        """执行其他任务"""
-        # 刷新设备列表
-        # self.refresh_machine()
-        # print('未停用的', self.get_activate_machine(),)
-        # 将停用的设备停止运行
-        # for _ in self.get_deactivate_machine():
-        #     self.kill_thread(list(_.keys())[0])
-        # 检查是否新增设备，有的话启动新线程
-        # self.start_all_thread()
-        # 执行下发、删除人脸
-        self.task_face()
-        time.sleep(60)
-        # 打印存活线程
-        logger.warning(f'共计：{threading.active_count()}个线程正在运行，存活的线程{self.get_online_thread()}')
-        print('有', threading.active_count(), '个线程正在运行', threading.enumerate())
-        return self.task_loop()
+        while True:
+            """执行其他任务"""
+            # 刷新设备列表
+            try:
+                self.refresh_machine()
+            except:
+                pass
+            print('未停用的', self.threads)
+            # 将停用的设备停止运行
+            for _ in self.get_deactivate_machine():
+                self.kill_thread(list(_.keys())[0])
+            # 检查是否新增设备，有的话启动新线程
+            self.start_all_thread()
+            # 执行下发、删除人脸
+            try:
+                logger.info('开始下发人脸')
+                self.task_face()
+            except:
+                traceback.print_exc()
+                logger.error('下发人脸异常')
+            # 打印存活线程
+            # logger.info(f'共计：{threading.active_count()}个线程正在运行，存活的线程{self.get_online_thread()}')
+            print('有', threading.active_count(), '个线程正在运行', threading.enumerate())
+            if threading.active_count() == 1:
+                LongLink.exit()
+            time.sleep(Config.poll_time)
 
     def task_face(self):
         for obj in self.threads:
             try:
                 _lk: LongLink = self.threads[obj]['LongLink']
-            except KeyError as e:
-                logger.warning('本该在线的长连接LongLink，却不在线')
+            except Exception as e:
+                logger.error('本该在线的长连接LongLink，却不在线')
             else:
                 _lk.addStaff()
                 _lk.delStaff()
@@ -695,7 +723,7 @@ class MachineThread:
         if key not in self.threads.keys():
             self.threads[key] = obj
         else:
-            logging.error("已存在无法添加到线程容器")
+            logger.warning("已存在无法添加到线程容器")
 
     def refresh_machine(self):
         """刷新获取所有消费机设备 并且放入容器"""
@@ -753,7 +781,8 @@ class MachineThread:
         """
         deactivate_machines = []
         for machine in self.sbinfo:
-            if self.sbinfo[machine]['query_obj']['ty'] == True:
+            if self.sbinfo[machine]['query_obj']['ty'] is True or self.sbinfo[machine]['query_obj']['sbip'] != \
+                    self.get_online_thread()[machine]['query_obj'].get('sbip'):
                 deactivate_machines.append({machine: self.sbinfo[machine]})
         return deactivate_machines
 
@@ -769,9 +798,9 @@ class MachineThread:
         try:
             tl: LongLink = self.threads[ids]['LongLink']
             tl.stop()
-            logger.warning(f'{self.threads[ids]}停用设备关闭成功')
+            logger.info(f'{self.threads[ids]}停用设备关闭成功')
         except Exception as e:
-            logger.warning(str(e) + f'停用设备，不在线了{self.threads}')
+            logger.info(f'停用设备，不在线了 设备id:{ids}')
 
     def getPicByPath(self, picpath) -> bytes:
         """
@@ -798,7 +827,6 @@ def main():
         mt.task_loop()
     except KeyboardInterrupt:
         print("主动关闭报错")
-        print('获取在线的线程', mt.get_online_thread())
         exit()
     except RecursionError:
         print("关闭进程，重启服务")
@@ -807,4 +835,4 @@ def main():
 if __name__ == '__main__':
     main()
 
-    # mt.kill_thread(2) #杀死对象key为2的线程
+# mt.kill_thread(2) #杀死对象key为2的线程

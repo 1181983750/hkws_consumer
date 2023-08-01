@@ -59,6 +59,9 @@ class HKWSXFMXView(APIView, Standard):
         elif request.path == '/Report/GetCzmxStatistics/':
             """获取 每日 充值 统计 情况"""
             return self.get_czmx_statistics(request)
+        elif request.path == '/Report/GetDaysCountCZmx/':
+            """根据 日期范围 统计充值明细 """
+            return self.getDaysCountCZmx(request)
         return JsonResponse(ResponseResult(msg='此请求地址有误').__call__())
 
     def recharge(self, request):
@@ -156,6 +159,13 @@ class HKWSXFMXView(APIView, Standard):
         # except:
         #     return JsonResponse(ResponseResult(msg='查询日期格式不对，YYYY-MM-DD', data=[])())
         result_response = self.service.get_czmx(data, hkws_xf_xfmxModelSerializer)
+        return JsonResponse(result_response.__call__())
+
+    @datetime_format
+    def getDaysCountCZmx(self, request):
+        """根据日期范围统计充值明细"""
+        data: dict = request.data
+        result_response = self.service.get_czmx_by_rangeDate(data, hkws_xf_xfmxModelSerializer)
         return JsonResponse(result_response.__call__())
 
     @datetime_format

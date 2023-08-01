@@ -1,11 +1,12 @@
-from django.db import connection
+from django.db import connection, ConnectionHandler
 
-
+# ConnectionHandler().create_connection('default')
 class SqlServerObject:
     """数据库链接操作类"""
     def __init__(self):
         try:
             self._conn = connection
+            print(self._conn)
             self._cursor = self._conn.cursor()
         except Exception as e:
             raise Exception('数据连接错误', e)
@@ -46,3 +47,5 @@ class SqlServerObject:
             self.close_db()
         except Exception as e:
             print('关闭连接', e)
+
+

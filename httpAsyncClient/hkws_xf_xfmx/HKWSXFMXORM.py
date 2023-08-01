@@ -38,7 +38,7 @@ class HKWSXFMXORM(BaseORM):
         :param month:
         :return:
         """
-        return self.model.objects.filter(Q(ygid=ygid, sjrq__month=month, xfje__gt=0), (Q(xflx=3) | Q(xflx=6)))
+        return hkws_xf_xfmx.objects.filter(Q(ygid=ygid, sjrq__year=datetime.datetime.now().year, sjrq__month=month, xfje__gt=0), (Q(xflx=3) | Q(xflx=6)))
 
     def get_month_bt_lt_xfje_by_ygid(self, ygid: Union[str, int], month: int) -> QuerySet:
         """
@@ -47,7 +47,7 @@ class HKWSXFMXORM(BaseORM):
         :param month:
         :return:
         """
-        return self.model.objects.filter(Q(ygid=ygid, sjrq__month=month), (Q(xflx=3) | Q(xflx=6)), xfje__lt=0)
+        return self.model.objects.filter(Q(ygid=ygid, sjrq__year=datetime.datetime.now().year, sjrq__month=month, xfje__lt=0), (Q(xflx=3) | Q(xflx=6)))
 
     def get_xfmx_by_dateTime(self, dateStart, dateEnd) -> QuerySet:
         """
@@ -213,4 +213,14 @@ class HKWSXFMXORM(BaseORM):
         result_set, column_list = self.sql_orm.query_data(sql)
         return result_set, column_list
 
+    def getDaysCountCZmx(self, dateStart: str, dateEnd: str) -> tuple:
+        """
+        根据时间统计充值金额明细
+        :param dateStart: 必填
+        :param dateEnd: 必填
+        :return: tuple
+        """
+        sql = f"""select CONVERT(VARCHAR, sjrq, 23) as days, sum(xfje) as xfje from hkws_xf_xfmx  WHERE xflx=1 and sjrq between '%s' and '%s' GROUP BY  CONVERT(VARCHAR, sjrq, 23)"""%(dateStart, dateEnd)
+        result_set, column_list = self.sql_orm.query_data(sql)
+        return result_set, column_list
 

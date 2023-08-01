@@ -16,7 +16,7 @@ consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(formatter)
 consoleHandler.setLevel(logging.DEBUG)
 # 创建一个输出到文件的 handler
-fileHandler = logging.FileHandler(Config.log_path, mode='a',encoding='utf-8')
+fileHandler = logging.FileHandler(Config.log_path, mode='a', encoding='utf-8')
 fileHandler.setFormatter(formatter)
 fileHandler.setLevel(logging.INFO)
 if settings.DEBUG:

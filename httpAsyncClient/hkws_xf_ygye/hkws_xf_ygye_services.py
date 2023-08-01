@@ -1,5 +1,5 @@
 import copy
-from decimal import Decimal
+from decimal import Decimal, getcontext
 from typing import Type, Union
 
 from django.db.models import QuerySet
