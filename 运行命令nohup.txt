@@ -1,0 +1,7 @@
+nohup python MachinePublic.py>MP.log 2>&1 &
+
+nohup python kill_pid.py>kill_pid.log 2>&1 &
+
+
+后台运行不输出任何信息: nohup ./test > /dev/null 2>&1 &
+后台运行输出日志: nohup ./test > /tmp/1.log 2>&1 &
