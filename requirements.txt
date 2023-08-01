@@ -1,5 +1,7 @@
 amqp==5.1.1
 anyio==3.5.0
+django-db-multitenant==0.3.2
+concurrent-log-handler==0.9.20
 asgiref==3.4.1
 async-timeout==4.0.2
 billiard==3.6.4.0
@@ -43,3 +45,7 @@ urllib3==1.26.9
 vine==5.0.0
 wcwidth==0.2.5
 wrapt==1.14.1
+pip~=22.1.2
+attrs~=22.1.0
+wheel~=0.37.1
+setuptools~=62.6.0
