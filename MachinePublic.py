@@ -324,6 +324,15 @@ class ParseData:
     # 处理剩下的内容
 
 
+import asyncio
+
+
+# 定义一个异步函数
+async def async_task():
+    await asyncio.sleep(2)
+    print("异步任务完成")
+
+
 class LongLink(threading.Thread):
     """开启长链接"""
 
@@ -345,6 +354,11 @@ class LongLink(threading.Thread):
         self.token = ''
 
     def run(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop( self.loop)
+
+
+
         self.start_long_link()
 
     def start_long_link(self):
@@ -378,20 +392,20 @@ class LongLink(threading.Thread):
             # 清空所有数据，退出线程并且清空在线设备容器
             self.reset_parse_data()
             # 被动断网 保持重连
-            time.sleep(1)
+
             if not self.kill:
                 logger.warning(f'{self.ip}长时间未读取到数据，被动断网 即将重连')
                 self.run()
             else:
                 # WeChatPush(server=f'消费机线程停止成功{self.ip}').run()
                 self.mt.threads[self.ids].pop('query_obj', '')
-                del self.mt.threads[self.ids]['LongLink']
+                self.mt.threads[self.ids].pop('LongLink', '')
                 return '停止成功'
         except Exception as e:
             # traceback.print_exc()
             logger.warning(e)
             print('其他异常', str(e), self.ids, self.kill)
-            time.sleep(1)
+
             self.reset_parse_data()
             # 被动断网 保持重连
             if not self.kill:
