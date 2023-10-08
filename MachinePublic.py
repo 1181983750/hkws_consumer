@@ -3,6 +3,8 @@ import os
 import platform
 import traceback
 
+# from wxPush import WeChatPush
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'httpxs.settings')
 import django
 from django.db import transaction
@@ -355,6 +357,8 @@ class LongLink(threading.Thread):
                     self.parse_data.parse_data(data)
                     if self.parse_data.content_type is None:
                         if self.kill:
+                            self.mt.threads[self.ids].pop('query_obj', '')
+                            del self.mt.threads[self.ids]['LongLink']
                             logger.warning('停止成功')
                             break
                 self.reset_parse_data()
@@ -363,6 +367,7 @@ class LongLink(threading.Thread):
                 if not self.kill:
                     self.run()
                 else:
+                    self.mt.threads[self.ids].pop('query_obj', '')
                     del self.mt.threads[self.ids]['LongLink']
                     return '停止成功'
         except RecursionError:
@@ -378,6 +383,8 @@ class LongLink(threading.Thread):
                 logger.warning(f'{self.ip}长时间未读取到数据，被动断网 即将重连')
                 self.run()
             else:
+                # WeChatPush(server=f'消费机线程停止成功{self.ip}').run()
+                self.mt.threads[self.ids].pop('query_obj', '')
                 del self.mt.threads[self.ids]['LongLink']
                 return '停止成功'
         except Exception as e:
@@ -388,11 +395,13 @@ class LongLink(threading.Thread):
             self.reset_parse_data()
             # 被动断网 保持重连
             if not self.kill:
+                # WeChatPush(server=f'消费机线程异常, 即将重连:{self.ip}').run()
                 logger.warning(f'{self.ip}异常 即将重连:{str(e), self.kill}')
                 self.run()
 
             else:
-                del self.mt.threads[self.ids]['LongLink']
+                self.mt.threads[self.ids].pop('query_obj', '')
+                self.mt.threads[self.ids].pop('LongLink', '')
                 return '停止成功'
 
     def reset_parse_data(self):
@@ -409,6 +418,7 @@ class LongLink(threading.Thread):
             os.system('taskkill /f /t /im {pid}'.format(pid=pid))
         elif sys_name == 'Linux':
             os.system('kill -9 {pid}'.format(pid=pid))
+        # WeChatPush(server=f'消费机进程退出').run()
 
     def stop(self):
         # logger.warning('开始杀死该线程')
@@ -470,7 +480,7 @@ class LongLink(threading.Thread):
                 else:
                     logger.error(f'{ygid, ygmc}有需要下发的人脸，但是获取不到图片设备id：{sbid}')
             else:
-                print(f"{ygid - ygmc}.jpg not in Config.rl_path the {Config.rl_path}")
+                print(f"{ygid}-{ygmc}.jpg not in Config.rl_path the {Config.rl_path}")
 
     def delStaff(self):
         """通过ygid删除人脸"""
@@ -544,12 +554,15 @@ class LongLink(threading.Thread):
                   + "Content-Length: " + str(len(byte_pic)) + "\r\n\r\n" \
                   + byte_pic + "\r\n" \
                   + "--" + boundary + "--\r\n"
-        response = self.requests.post(f"http://{self.ip}/ISAPI/AccessControl/userInfoAndRight/setup?format=json",
-                                      auth=HTTPDigestAuth(self.username, self.password),
-                                      verify=False,
-                                      data=payload,
-                                      headers=headers,
-                                      timeout=self.timeout)
+        try:
+            response = self.requests.post(f"http://{self.ip}/ISAPI/AccessControl/userInfoAndRight/setup?format=json",
+                                          auth=HTTPDigestAuth(self.username, self.password),
+                                          verify=False,
+                                          data=payload,
+                                          headers=headers,
+                                          timeout=self.timeout)
+        except Exception:
+            return False
 
         logger.info(response.text)
         #        print(response.text)
@@ -624,6 +637,8 @@ class LongLink(threading.Thread):
                                           timeout=5)
         except self.requests.ConnectTimeout:
             return False
+        except Exception:
+            return False
         logger.info(response.text)
         #        print(response.text)
         if response.text.find("\"deleteUser\": true,") != -1:
@@ -683,6 +698,7 @@ class MachineThread:
             print('未停用的', self.threads)
             # 将停用的设备停止运行
             for _ in self.get_deactivate_machine():
+                print(list(_.keys())[0], _)
                 self.kill_thread(list(_.keys())[0])
             # 检查是否新增设备，有的话启动新线程
             self.start_all_thread()
@@ -781,9 +797,12 @@ class MachineThread:
         """
         deactivate_machines = []
         for machine in self.sbinfo:
-            if self.sbinfo[machine]['query_obj']['ty'] is True or self.sbinfo[machine]['query_obj']['sbip'] != \
-                    self.get_online_thread()[machine]['query_obj'].get('sbip'):
-                deactivate_machines.append({machine: self.sbinfo[machine]})
+            try:
+                if self.sbinfo[machine]['query_obj']['ty'] is True or self.sbinfo[machine]['query_obj']['sbip'] != \
+                        self.get_online_thread()[machine]['query_obj'].get('sbip'):
+                    deactivate_machines.append({machine: self.sbinfo[machine]})
+            except Exception:
+                ...
         return deactivate_machines
 
     def get_online_thread(self):
@@ -822,6 +841,7 @@ def main():
     mt = MachineThread().get_instance()
     print('写入文件的process id:', os.getpid())
     try:
+        # WeChatPush(server='进程重启成功').run()
         mt.refresh_machine()
         mt.start_all_thread()
         mt.task_loop()
@@ -829,6 +849,7 @@ def main():
         print("主动关闭报错")
         exit()
     except RecursionError:
+        # WeChatPush(server='进程重连意外退出').run()
         print("关闭进程，重启服务")
 
 

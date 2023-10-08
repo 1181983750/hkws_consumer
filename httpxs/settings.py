@@ -85,7 +85,8 @@ WSGI_APPLICATION = 'httpxs.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-# 使用连接池
+
+# 使用连接池
 DATABASE_POOL_ARGS = {
     "max_overflow": 20,  # 连接池中可以创建的最大连接数
     "pool_size": 5,  # 连接池中保持的最小连接数
@@ -93,31 +94,31 @@ DATABASE_POOL_ARGS = {
 }
 
 DATABASES = {
-    #'default': {
-    #    'ENGINE': 'mssql',  # 数据库引擎设置
-    #    'NAME': 'cgyypt',  # 要连接的数据库名
-    #    'USER': 'sa',  # 数据库用户名
-    #   'PASSWORD': 'CgSqlServerRoot2012',  # 数据库密码
-    #    'HOST': '172.17.18.110',  # 数据库主机地址
-    #    'PORT': 1433,  # 数据库端口号，默认可以不写 写了连不上....???
-    #    'OPTIONS': {
-    #        'driver': 'ODBC Driver 17 for SQL Server',
-            # 'driver': 'SQL Server Native Client 11.0'
-    #    },
-    #},
     'default': {
-        'ENGINE': 'mssql',  # 数据库引擎设置
-        'NAME': 'cgyypt',  # 要连接的数据库名
-        'USER': 'sa',  # 数据库用户名
-        'PASSWORD': 'ERPsqlpassword@20220409.',  # 数据库密码
-        'HOST': '192.168.50.165',  # 数据库主机地址
-        'PORT': 1433,  # 数据库端口号，默认可以不写 写了连不上....???
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'MARS_Connection': True,
-        },
-        "POOL_ARGS": DATABASE_POOL_ARGS,
+       'ENGINE': 'mssql',  # 数据库引擎设置
+       'NAME': 'cgyypt',  # 要连接的数据库名
+       'USER': 'sa',  # 数据库用户名
+      'PASSWORD': 'CgSqlServerRoot2012',  # 数据库密码
+       'HOST': '172.17.18.110',  # 数据库主机地址
+       'PORT': 1433,  # 数据库端口号，默认可以不写 写了连不上....???
+       'OPTIONS': {
+           'driver': 'ODBC Driver 17 for SQL Server',
+            # 'driver': 'SQL Server Native Client 11.0'
+       },
     },
+    # 'default': {
+    #     'ENGINE': 'mssql',  # 数据库引擎设置
+    #     'NAME': 'cgyypt',  # 要连接的数据库名
+    #     'USER': 'sa',  # 数据库用户名
+    #     'PASSWORD': 'ERPsqlpassword@20220409.',  # 数据库密码
+    #     'HOST': '192.168.50.165',  # 数据库主机地址
+    #     'PORT': 1433,  # 数据库端口号，默认可以不写 写了连不上....???
+    #     'OPTIONS': {
+    #         'driver': 'ODBC Driver 17 for SQL Server',
+    #         'MARS_Connection': True,
+    #     },
+    #     "POOL_ARGS": DATABASE_POOL_ARGS,
+    # },
 
     # 'default': {
     #         'ENGINE': 'mssql',  # 数据库引擎设置

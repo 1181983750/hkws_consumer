@@ -30,6 +30,8 @@ import schedule
 import MachinePublic
 import psutil
 
+# from wxPush import WeChatPush
+
 
 class ScheduleJob:
     lock_r = threading.RLock()
@@ -89,10 +91,12 @@ class ScheduleJob:
 
             self.machine_process = psutil.Process(self.machine_pid)
             if self.kill_zombie_process():
+                # WeChatPush(server='已成僵尸进程, 准备重启').run()
                 # 是僵尸进程就杀死当前僵尸进程，然后重新启动
                 self.start_machine_process()
 
         except psutil.NoSuchProcess:
+            # WeChatPush(server='进程意外退出').run()
             self.start_machine_process()
         except Exception as e:
             print("check_pid_alive函数报错", e)
@@ -105,7 +109,8 @@ def main():
     print("开始运行父进程", os.getpid())
     SJ = ScheduleJob()
     schedule.every(3).seconds.do(SJ.check_machine_alive)  # 每隔3秒检查进程是否存活
-    # schedule.every().wednesday.at("03:30").do(my_job)  # 每周三凌晨03：30
+    # 每天的特定时间执行任务
+    # schedule.every().day.at("08:00").do(WeChatPush(server='每日自检').check)
     while True:
         schedule.run_pending()  # run_pending：运行所有可以运行的任务
         time.sleep(1)
