@@ -2,6 +2,7 @@
 # The author: Tiger_YC
 import datetime
 import traceback
+from decimal import Decimal
 from typing import Type, Union
 
 from rest_framework.serializers import ModelSerializer
@@ -108,10 +109,10 @@ class HKWSXFBTServices(BaseService):
         if not data_list:
             return ResponseResult(msg='当前没有未执行批量补贴的名单')
         for obj in data_list:
-            ygid = obj.get('ygid')
+            ygid = str(obj.get('ygid'))
             ygdm = obj.get('ygdm')
             ygmc = obj.get('ygmc')
-            btje = obj.get('btje')
+            btje = Decimal(str(obj.get('btje') if obj.get('btje') else 0))
             if btje >= 0:
                 result = self.xfmx_orm.get_month_bt_gt_xfje_by_ygid(ygid=ygid, month=now_month)
                 if result:

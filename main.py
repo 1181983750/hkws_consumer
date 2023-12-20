@@ -61,14 +61,31 @@ def request():
               + byte_pic \
               + "\r\n--" + boundary + "--\r\n"
 
-    resp = requests.post('http://172.17.1.23/ISAPI/AccessControl/userInfoAndRight/setup?format=json', data=payload,verify=False,
+    resp = requests.post('http://172.17.1.23/ISAPI/AccessControl/userInfoAndRight/setup?format=json', data=payload,
+verify=False,
                          timeout=10, headers=headers, auth=HTTPDigestAuth('admin', 'ynyb666666'))
 
     print(resp.text)
     # file1.close()
 
 
-#下发人脸 sql
+# -*- coding: utf-8 -*-
+from boto3.session import Session
+# 填写 EOS 账号的认证信息，或者子账号的认证信息
+access_key = "sk"
+secret_key = "yslRRGIofHrBUdbOEtmKo4ZmqWAE3ULF02kgnZCi"
+# 填写地域对应的 url。以华东 - 苏州为例，endpoint 填写 http://eos-wuxi-1.cmecloud.cn
+url = "http://eos-chongqing-3.cmecloud.cn"
+session = Session(access_key, secret_key)
+bucket_client = session.client('s3', endpoint_url=url)
+bucket_name = 'kunming-xfj-pic'
+
+# Client 初始化结束
+# 列出当前账号所有地域下的存储桶
+for bucket in bucket_client.list_buckets()["Buckets"]:
+    print(bucket['Name'])
+
+#下发人脸 sql
 #select e.id as sbid,e.sbip,a.ygid,b.ygmc from ykt_ickqy a
 #                        join rs_ygxx b on a.ygid = b.id
 #                       join ykt_csh_ickqy c on c.id = a.qyid
@@ -76,7 +93,7 @@ def request():
 #                        left join hkws_xf_sbygxx f on f.ygid=a.ygid and f.sbid = e.id
 #                        where b.sflz = 0 and e.ty = 0 and e.sblxid = 4 and f.ygid is null and b.hkws_rlbs = 1 
 #                        and e.id = {sbid}
-request()
+# request()
 #headers = {"Content-Type": "multipart/form-data; boundary=" + "222",
 #               "Accept": "text/html, application/xhtml+xml",
 #               "Accept-Language": "zh-CN",

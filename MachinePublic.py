@@ -356,20 +356,18 @@ class LongLink(threading.Thread):
                                     timeout=50) as r:
                 for data in r.iter_bytes():
                     self.parse_data.parse_data(data)
-                    if self.parse_data.content_type is None:
-                        if self.kill:
-                            self.mt.threads[self.ids].pop('query_obj', '')
-                            self.mt.threads[self.ids].pop('LongLink', '')
-                            logger.warning('停止成功')
-                            break
+                    if self.kill:
+                        self.mt.threads.pop(self.ids, '')
+                        logger.warning('停止成功')
+                        break
                 self.reset_parse_data()
                 print(self.ip, '# 被动断网 保持重连', self.kill, )
                 time.sleep(1.5)
                 if not self.kill:
                     self.run()
                 else:
-                    self.mt.threads[self.ids].pop('query_obj', '')
-                    del self.mt.threads[self.ids]['LongLink']
+                    self.mt.threads.pop(self.ids, '')
+
                     return '停止成功'
         except RecursionError:
             logger.info('重连次数超过递归最大限制，退出重启！！！！！！！！！！！！')
@@ -383,11 +381,10 @@ class LongLink(threading.Thread):
 
             if not self.kill:
                 logger.warning(f'{self.ip}长时间未读取到数据，被动断网 即将重连')
-                self.run()
+                self.exit()
             else:
                 # WeChatPush(server=f'消费机线程停止成功{self.ip}').run()
-                self.mt.threads[self.ids].pop('query_obj', '')
-                self.mt.threads[self.ids].pop('LongLink', '')
+                self.mt.threads.pop(self.ids, '')
                 return '停止成功'
         except Exception as e:
             # traceback.print_exc()
@@ -402,8 +399,7 @@ class LongLink(threading.Thread):
                 self.run()
 
             else:
-                self.mt.threads[self.ids].pop('query_obj', '')
-                self.mt.threads[self.ids].pop('LongLink', '')
+                self.mt.threads.pop(self.ids, '')
                 return '停止成功'
 
     def reset_parse_data(self):
@@ -423,7 +419,7 @@ class LongLink(threading.Thread):
         # WeChatPush(server=f'消费机进程退出').run()
 
     def stop(self):
-        # logger.warning('开始杀死该线程')
+        logger.warning('开始杀死该线程')
         self.kill = True
 
     def addStaff(self):
@@ -468,7 +464,7 @@ class LongLink(threading.Thread):
                         with open(picpath, "wb") as f:
                             f.write(img_res.text.encode(encoding='ISO-8859-1'))
                             f.close()
-            if f"{ygid}.jpg" in os.listdir(Config.rl_path):
+            elif f"{ygid}.jpg" in os.listdir(Config.rl_path):
                 pic = self.mt.getPicByPath(picpath)
                 if pic:
                     if self.handel_set_face_event(ygid, ygmc, pic):  # 无论成功都增加明细记录
@@ -482,6 +478,7 @@ class LongLink(threading.Thread):
                 else:
                     logger.error(f'{ygid, ygmc}有需要下发的人脸，但是获取不到图片设备id：{sbid}')
             else:
+                self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 0)
                 print(f"{ygid}-{ygmc}.jpg not in Config.rl_path the {Config.rl_path}")
 
     def delStaff(self):
@@ -690,33 +687,39 @@ class MachineThread:
 
     def task_loop(self):
         """开启时先调用一次，后面按轮询时间来"""
-        while True:
-            """执行其他任务"""
-            # 刷新设备列表
-            try:
-                self.refresh_machine()
-            except:
-                pass
-            print('未停用的', self.threads)
-            # 将停用的设备停止运行
-            for _ in self.get_deactivate_machine():
-                print(list(_.keys())[0], _)
-                self.kill_thread(list(_.keys())[0])
-            # 检查是否新增设备，有的话启动新线程
-            self.start_all_thread()
-            # 执行下发、删除人脸
-            try:
-                logger.info('开始下发人脸')
-                self.task_face()
-            except:
-                traceback.print_exc()
-                logger.error('下发人脸异常')
-            # 打印存活线程
-            # logger.info(f'共计：{threading.active_count()}个线程正在运行，存活的线程{self.get_online_thread()}')
-            print('有', threading.active_count(), '个线程正在运行', threading.enumerate())
-            if threading.active_count() == 1:
-                LongLink.exit()
-            time.sleep(Config.poll_time)
+        try:
+            while True:
+                """执行其他任务"""
+                # 刷新设备列表
+                try:
+                    self.sbinfo = self.refresh_machine()
+                except:
+                    print('sadasd')
+                    pass
+                print('未停用的', self.threads)
+                # 将停用的设备停止运行
+                for ids in self.get_deactivate_machine():
+                    self.kill_thread(ids)
+                # 检查是否新增设备，有的话启动新线程
+                self.start_all_thread()
+                # 执行下发、删除人脸
+                try:
+                    logger.info('开始下发人脸')
+                    self.task_face()
+                except:
+                    traceback.print_exc()
+                    logger.error('下发人脸异常')
+                # 打印存活线程
+                # logger.info(f'共计：{threading.active_count()}个线程正在运行，存活的线程{self.get_online_thread()}')
+                print('有', threading.active_count(), '个线程正在运行', threading.enumerate())
+                if threading.active_count() == 1:
+                    LongLink.exit()
+                time.sleep(Config.poll_time)
+        except Exception as e:
+            logger.error(str(e))
+            print(e)
+            self.task_loop()
+
 
     def task_face(self):
         for obj in self.threads:
@@ -771,7 +774,7 @@ class MachineThread:
         for i in self.sbinfo.keys():
             item = self.sbinfo[i]
             if not item.get('query_obj').get('ty'):
-                if self.threads.get(i) and 'LongLink' in self.threads.get(i):
+                if self.threads.get(i) and self.threads.get(i).get('LongLink') and item.get('sbip') == self.threads.get(i).get('query_obj', {}).get('sbip'):
                     continue
                 self.add_machine(i, {"query_obj": item.get('query_obj')})
                 i_: LongLink = LongLink(ip=item.get('query_obj').get('sbip'),
@@ -800,11 +803,11 @@ class MachineThread:
         deactivate_machines = []
         for machine in self.sbinfo:
             try:
-                if self.sbinfo[machine]['query_obj']['ty'] is True or self.sbinfo[machine]['query_obj']['sbip'] != \
+                if self.sbinfo[machine]['query_obj']['ty'] or self.sbinfo[machine]['query_obj']['sbip'] != \
                         self.get_online_thread()[machine]['query_obj'].get('sbip'):
-                    deactivate_machines.append({machine: self.sbinfo[machine]})
+                    deactivate_machines.append(machine)
             except Exception:
-                ...
+                LongLink.exit()
         return deactivate_machines
 
     def get_online_thread(self):
@@ -817,11 +820,12 @@ class MachineThread:
     def kill_thread(self, ids: int):
         """查看停用设备是否在在线设备列表，在的话就杀死线程   172.17.11.12"""
         try:
-            tl: LongLink = self.threads[ids]['LongLink']
-            tl.stop()
-            logger.info(f'{self.threads[ids]}停用设备关闭成功')
+            if self.threads.get(ids):
+                tl: LongLink = self.threads[ids]['LongLink']
+                tl.stop()
+                logger.info(f'{self.threads[ids]}停用设备关闭成功')
         except Exception as e:
-            logger.info(f'停用设备，不在线了 设备id:{ids}')
+            LongLink.exit()
 
     def getPicByPath(self, picpath) -> bytes:
         """
