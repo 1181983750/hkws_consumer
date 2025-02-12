@@ -110,7 +110,7 @@ def main():
     SJ = ScheduleJob()
     schedule.every(3).seconds.do(SJ.check_machine_alive)  # 每隔3秒检查进程是否存活
     # 每天的特定时间执行任务
-    # schedule.every().day.at("08:00").do(WeChatPush(server='每日自检').check)
+    # schedule.every(1).day.at("08:00").do(WeChatPush(server='每日自检').check)
     while True:
         schedule.run_pending()  # run_pending：运行所有可以运行的任务
         time.sleep(1)

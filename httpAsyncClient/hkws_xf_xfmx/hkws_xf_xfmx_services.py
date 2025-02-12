@@ -155,8 +155,6 @@ class HKWSXFMXServices(BaseService):
         :return:
         """
         now = datetime.date.today()
-        # now_month_start = datetime.datetime(now.year, now.month, 1)
-        # now_month_end = datetime.datetime(now.year, now.month, calendar.monthrange(now.year, now.month)[1]) #元组下标0返回 这个月第一天是星期几0-6
         if data_dict['amount'] > 0:
             # 查询当月是否有正数的补贴
             gt_btmx = self.orm.get_month_bt_gt_xfje_by_ygid(data_dict['ygid'],  now.month)
@@ -186,7 +184,7 @@ class HKWSXFMXServices(BaseService):
             hkws_xf_xfmx_model.ye = result
             hkws_xf_xfmx_model.sjrq = getBeijinTime()[1]
             assert self.orm.add(hkws_xf_xfmx_model), '补贴明细添加异常'
-        return ResponseResult(msg='补贴成功',code=1,data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']})
+        return ResponseResult(msg='补贴成功', code=1, data={"ygid": data_dict['ygid'], "xfje": data_dict['amount']})
 
     def get_xfmx(self, data_dict: dict, serializer: Type[ModelSerializer] = None):
         """

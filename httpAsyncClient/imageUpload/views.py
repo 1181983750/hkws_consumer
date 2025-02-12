@@ -3,6 +3,7 @@ from rest_framework.viewsets import ViewSet
 
 from httpAsyncClient.imageUpload.model import ImageFileds
 from httpAsyncClient.imageUpload.uploads_services import UploadServices
+from httpAsyncClient.models import hkws_xf_sbygxx
 from public.utils.onlineTime import getBeijinTime
 from public.utils.response_result import ResponseResult
 
@@ -32,6 +33,8 @@ class SingleFileUploadView(ViewSet):
         # file.name = f"{ygid}-{now.get('year')}-{now.get('month')}-{now.get('day')}.{file.name.split('.')[1]}"
         file.name = f"{ygid}.jpg"
         result_response = self.service.upload_image(file)
+        # 删除下发记录 重新下发本地文件人脸
+        hkws_xf_sbygxx.objects.filter(ygid=ygid).delete()
         return JsonResponse(result_response.__call__())
 
     def base64PicUpload(self, request):

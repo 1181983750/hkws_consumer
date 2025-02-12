@@ -349,12 +349,15 @@ class LongLink(threading.Thread):
         self.start_long_link()
 
     def start_long_link(self):
+        if not self.mt.threads[self.ids]:
+            self.mt.threads[self.ids] = {}
         self.mt.threads[self.ids].update(LongLink=self)  # 更新成在线状态
         try:
             with self.http_x.stream("GET", f"http://{self.ip}/ISAPI/Event/notification/alertStream",
                                     auth=self.http_x.DigestAuth(self.username, self.password),
                                     timeout=50) as r:
                 for data in r.iter_bytes():
+                    print(data)
                     self.parse_data.parse_data(data)
                     if self.kill:
                         self.mt.threads.pop(self.ids, '')
@@ -474,7 +477,7 @@ class LongLink(threading.Thread):
                         logger.error(f"设备id：{sbid}下发失败的员工{ygid, ygmc}")
                         # 下发失败的员工设备 把 isSuccess 改为0
                         self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 0)
-                    os.remove(f"{Config.rl_path}/{ygid}.jpg")
+                    # os.remove(f"{Config.rl_path}/{ygid}.jpg")
                 else:
                     logger.error(f'{ygid, ygmc}有需要下发的人脸，但是获取不到图片设备id：{sbid}')
             else:
@@ -705,7 +708,7 @@ class MachineThread:
                 # 执行下发、删除人脸
                 try:
                     logger.info('开始下发人脸')
-                    self.task_face()
+                    # self.task_face()
                 except:
                     traceback.print_exc()
                     logger.error('下发人脸异常')
@@ -719,7 +722,6 @@ class MachineThread:
             logger.error(str(e))
             print(e)
             self.task_loop()
-
 
     def task_face(self):
         for obj in self.threads:
@@ -774,7 +776,8 @@ class MachineThread:
         for i in self.sbinfo.keys():
             item = self.sbinfo[i]
             if not item.get('query_obj').get('ty'):
-                if self.threads.get(i) and self.threads.get(i).get('LongLink') and item.get('sbip') == self.threads.get(i).get('query_obj', {}).get('sbip'):
+                if self.threads.get(i) and self.threads.get(i).get('LongLink') and item.get('sbip') == self.threads.get(
+                        i).get('query_obj', {}).get('sbip'):
                     continue
                 self.add_machine(i, {"query_obj": item.get('query_obj')})
                 i_: LongLink = LongLink(ip=item.get('query_obj').get('sbip'),
