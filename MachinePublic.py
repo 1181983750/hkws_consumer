@@ -240,18 +240,15 @@ class ParseData:
             start_index = da.find(ContentT)
             start_content_length = da.find(ContentL)
             end_content_length = da.find(end, start_content_length)
-
-            if b'Content-Type: application/json' in da[start_index:start_content_length]:
+            if b'Content-Type: application/json' in da[start_index: start_content_length]:
                 self.content_type = 'JSON'
-            elif b'Content-Type: image/jpeg' in da[start_index:start_content_length]:
+            elif b'Content-Type: image/jpeg' in da[start_index: start_content_length]:
                 self.content_type = 'IMAGE'
             else:
                 logger.warning('content_type未处理的格式')
-            content_length_temp = da[start_content_length:end_content_length]
+            content_length_temp = da[start_content_length: end_content_length]
 
-            self.content_length = int(
-                content_length_temp.split(ContentL).pop().decode(encoding='utf-8', errors='strict').strip())
-
+            self.content_length = int(content_length_temp.split(ContentL).pop().decode(encoding='utf-8', errors='strict').strip())
             if self.content_type == 'JSON':
                 offset = 2
                 left_temp = da[end_content_length + len(end) + offset:len(da)]
@@ -276,18 +273,16 @@ class ParseData:
                 count += 1
             else:
                 break
-        da = da[count:len(da)]
+        da = da[count: len(da)]
         # 拼接结束
-
         if len(self.content) >= self.content_length:
             # 处理content
+            print('join!!!!!', self.content_type)
             if self.content_type == 'IMAGE':
                 pass
             # self.fileinput(self.content, self.image_dict)
             elif self.content_type == 'JSON':
                 logger.info(f'我是:{self.ip}')
-                # print(self.content)
-                # print(len(self.content))
                 de_json = json.loads(self.content.decode(encoding='utf-8'))
                 if de_json['eventType'] == 'videoloss':
                     pass
@@ -297,7 +292,6 @@ class ParseData:
                     self.handle_transaction_event(de_json)
                 elif de_json['eventType'] == 'AccessControllerEvent':
                     pass
-                # print('访问控制器', de_json)
                 elif de_json['eventType'] == 'ConsumptionEvent':
 
                     self.image_dict = de_json
@@ -357,8 +351,8 @@ class LongLink(threading.Thread):
                                     auth=self.http_x.DigestAuth(self.username, self.password),
                                     timeout=50) as r:
                 for data in r.iter_bytes():
-                    print(data)
                     self.parse_data.parse_data(data)
+                    print(data)
                     if self.kill:
                         self.mt.threads.pop(self.ids, '')
                         logger.warning('停止成功')
@@ -447,9 +441,10 @@ class LongLink(threading.Thread):
         else:
             self.token = login_res.json().get("token", self.token)
         for item in result:
-            print("开始下发人脸")
             ygid = item.get("ygid")
             ygmc = item.get("ygmc")
+            print("开始下发人脸", ygid, ygmc)
+
             picpath = f'{Config.rl_path}{ygid}.jpg'
             if f"{ygid}.jpg" not in os.listdir(Config.rl_path):
                 try:
@@ -477,12 +472,13 @@ class LongLink(threading.Thread):
                         logger.error(f"设备id：{sbid}下发失败的员工{ygid, ygmc}")
                         # 下发失败的员工设备 把 isSuccess 改为0
                         self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 0)
-                    # os.remove(f"{Config.rl_path}/{ygid}.jpg")
+                    os.remove(f"{Config.rl_path}/{ygid}.jpg")
                 else:
                     logger.error(f'{ygid, ygmc}有需要下发的人脸，但是获取不到图片设备id：{sbid}')
             else:
                 self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 0)
                 print(f"{ygid}-{ygmc}.jpg not in Config.rl_path the {Config.rl_path}")
+
 
     def delStaff(self):
         """通过ygid删除人脸"""
