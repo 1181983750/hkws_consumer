@@ -1,6 +1,7 @@
 import logging
 import os
 import platform
+import pprint
 import traceback
 
 # from wxPush import WeChatPush
@@ -30,28 +31,35 @@ from httpAsyncClient.hkws_yg_sbqy.HKWSYGSBQYORM import HKWSYGSBQYORM
 import json
 import threading
 import time
-from typing import Any
+from typing import Any, Union
 import httpx
 import requests
-import asyncio
 from requests.auth import HTTPDigestAuth
 
 XML = 1
 JSON = 2
 IMAGE = 3
-end = b"\r\n"
-boundary = b"--MIME_boundary"
-ContentT = b"Content-Type: "
-ContentL = b"Content-Length: "
+end = "\r\n"
+boundary = "--MIME_boundary"
+ContentT = "Content-Type: "
+ContentL = "Content-Length: "
+ContentID = "Content-ID: "
+ContentDt = "Content-Disposition: "
+lock = threading.Lock()
 
 
 class ParseData:
 
     def __init__(self, ip: str, username: str, password: str):
+        self.image_content = b''
         self.ip = ip
         self.content_type = None
         self.content_length = None
-        self.content = b''
+        self.content_id = None
+        self.content_disposition = ''
+        self.content = ''
+        self.username = username
+        self.password = password
         self.auth = httpx.DigestAuth(username, password)
         self.http_x = httpx
         self.HKWSYGSBQYORM = HKWSYGSBQYORM(hkws_yg_sbqy)
@@ -74,6 +82,7 @@ class ParseData:
         activePostCount = data.get('activePostCount')
         detail = data.get('TransactionRecordEvent')
         type = detail.get('type')
+        print(type)
         serialNo = detail.get('serialNo')
         employeeNoString = detail.get('employeeNoString')
         modeType = detail.get('modeType')
@@ -115,21 +124,28 @@ class ParseData:
                 # 有serialNo此单了 返回成功信息
                 response_transaction = True
         if response_transaction is not None:
-            json_data_t = {'TransactionRecordEventConfirm': {}}
-            json_data_t['TransactionRecordEventConfirm']['serialNo'] = int(serialNo)
-            json_data_t['TransactionRecordEventConfirm']['result'] = 'success' if response_transaction else 'failed'
-            response_t = self.http_x.put(f"http://{self.ip}/ISAPI/Consume/transactionRecordEventConfirm",
-                                         auth=self.auth,
+            json_data_t = {'TransactionRecordEventConfirm': {
+                                                    'serialNo': int(serialNo),
+                                                    'result': 'success' if response_transaction else 'failed',
+                                                    }
+                            }
+            response_t = requests.put(f"http://{self.ip}/ISAPI/Consume/transactionRecordEventConfirm",
+                                         auth=requests.auth.HTTPDigestAuth(self.username, self.password),
+                                         verify=False,
                                          params={'format': 'json'}, json=json_data_t)
             # print(f"交易确认回执{response_t.text}流水号:{serialNo}")
             logger.warning(f"交易确认回执{response_t.text}流水号:{serialNo}")
         if response_refund is not None:
-            json_data_c = {'TransactionRecordEventConfirm': {}}
-            json_data_c['TransactionRecordEventConfirm']['serialNo'] = int(serialNo)
-            json_data_c['TransactionRecordEventConfirm']['result'] = 'success' if response_refund else 'failed'
+            json_data_c = {'TransactionRecordEventConfirm': {
+                'serialNo': int(serialNo),
+                'result': 'success' if response_refund else 'failed',
+            }
+            }
             response_c = self.http_x.put(f"http://{self.ip}/ISAPI/Consume/transactionRecordEventConfirm",
                                          auth=self.auth,
+                                         verify=False,
                                          params={'format': 'json'}, json=json_data_c)
+            print('退款RES', response_c.text, response_refund)
             logger.warning(f"退款确认回执{response_c.text}流水号:{serialNo}")
 
     def handle_consumption_event(self, data: dict):
@@ -223,100 +239,120 @@ class ParseData:
         # 小数点处理
         balanceBeforeDeduct = str(query_ye).split(".")[0]
         # 处理完提交数据:
+        print(name, employeeNo)
         json_data = {'queryUUID': queryUUID, 'queryResult': 'success', 'name': name, 'employeeNo': employeeNo,
-                     'balance': balanceBeforeDeduct, 'remainingTimes': 1}
+                     'balance': balanceBeforeDeduct, 'remainingTimes': 0}
         response = self.http_x.put(f"http://{self.ip}/ISAPI/Consume/localQueryResult", auth=self.auth,
                                    params={'format': 'json'}, json=json_data)
         logger.warning(response.read())
 
-    def parse_data(self, da: bytes):
-        if self.content_type is None:
-            self.__init_data(da)
+    def process_line(self, line: str):
+        if line.strip() == '':
+            return True
+
+        if ContentT in line:
+            # 定义类型
+            self.content_type = self.get_content_type(line)
+            return True
+
+        if ContentL in line:
+            # 定义长度
+            self.content_length = self.get_content_length(line)
+            return True
+
+        if ContentID in line:
+            self.content_id = self.get_content_id(line)
+            return True
+
+        if ContentDt in line:
+            self.content_disposition = self.get_content_disposition(line)
+            return True
+
+
+    def parse_data(self, line: Union[str, bytes]):
+        # 处理完成后:
+        if not self.content_disposition:
+            self.content_disposition = ''
+        if self.content_disposition.find("filename") != -1:
+            # 存在图片数据
+            self.image_content += line.encode()
         else:
-            self.append_data(da)
+            self.content += line
 
-    def __init_data(self, da: bytes):
-        if ContentT in da:
-            start_index = da.find(ContentT)
-            start_content_length = da.find(ContentL)
-            end_content_length = da.find(end, start_content_length)
-            if b'Content-Type: application/json' in da[start_index: start_content_length]:
-                self.content_type = 'JSON'
-            elif b'Content-Type: image/jpeg' in da[start_index: start_content_length]:
-                self.content_type = 'IMAGE'
-            else:
-                logger.warning('content_type未处理的格式')
-            content_length_temp = da[start_content_length: end_content_length]
+        if self.content_type == 'JSON':
+            if self.content.find(boundary) != -1:
+                self.content = self.content[:self.content_length]
 
-            self.content_length = int(content_length_temp.split(ContentL).pop().decode(encoding='utf-8', errors='strict').strip())
-            if self.content_type == 'JSON':
-                offset = 2
-                left_temp = da[end_content_length + len(end) + offset:len(da)]
-
-                self.append_data(left_temp)
-            elif self.content_type == 'IMAGE':
-                offset = da.find(b'\r\n\r\n', start_index + len(end)) + len(b'\r\n\r\n')
-                # left_temp = da[offset:len(da)][:-17]
-                left_temp = da[offset:len(da)]
-                # 开始读取内容到self.content
-                self.append_data(left_temp)
-
-        else:
-            self.content += da
-
-    def append_data(self, da: bytes):
-        self.content = self.content.replace(b'--MIME_boundary\r\n', b'')
-        count = 0
-        for i in da:
-            if len(self.content) < self.content_length:
-                self.content += bytes([i])
-                count += 1
-            else:
-                break
-        da = da[count: len(da)]
-        # 拼接结束
-        if len(self.content) >= self.content_length:
-            # 处理content
-            print('join!!!!!', self.content_type)
-            if self.content_type == 'IMAGE':
-                pass
-            # self.fileinput(self.content, self.image_dict)
-            elif self.content_type == 'JSON':
-                logger.info(f'我是:{self.ip}')
-                de_json = json.loads(self.content.decode(encoding='utf-8'))
-                if de_json['eventType'] == 'videoloss':
-                    pass
-                elif de_json['eventType'] == 'TransactionRecordEvent':
-
-                    self.image_dict = de_json
-                    self.handle_transaction_event(de_json)
-                elif de_json['eventType'] == 'AccessControllerEvent':
-                    pass
-                elif de_json['eventType'] == 'ConsumptionEvent':
-
-                    self.image_dict = de_json
-                    self.handle_consumption_event(de_json)
-                elif de_json['eventType'] == 'ConsumptionQuery':
-                    print('余额查询')
-                    self.handle_query_ye_event(de_json)
-                else:
-                    print(f'其他json事件{de_json}')
-                    logger.warning(f'其他json事件{de_json}')
-            else:
-                de_json = json.loads(self.content.decode(encoding='utf-8'))
-                logger.warning(f'未处理的格式{de_json}')
-            #            print('*' * 100)
-            # 处理content结束
-
-            # 处理剩下的内容
-            self.content = b''
-            self.content_type = None
-            # print('left_temp', da)
-            if len(da) == 0 or da.find(ContentT) == -1:
+                if self.content.endswith('-'):
+                    self.content = self.content[:-1]
+                content_json = json.loads(self.content)
+                self.handel_json_data(content_json)
+                self.content = ''
                 self.content_length = None
-            else:
-                self.parse_data(da)
-    # 处理剩下的内容
+
+
+        elif self.content_type == 'IMAGE':
+            if self.content.find(boundary) != -1:
+                self.image_content = self.image_content[:self.content_length]
+                self.handel_image_data()
+                self.image_content = b''
+                self.content_length = None
+
+    def handel_json_data(self, content_json: dict):
+        logger.info(f'我是:{self.ip}')
+        if content_json['eventType'] == 'videoloss':
+            pass
+        elif content_json['eventType'] == 'TransactionRecordEvent':
+            self.image_dict = content_json
+            self.handle_transaction_event(content_json)
+            print('交易确认')
+        elif content_json['eventType'] == 'AccessControllerEvent':
+            pass
+        elif content_json['eventType'] == 'ConsumptionEvent':
+            self.image_dict = content_json
+            self.handle_consumption_event(content_json)
+            print('消费确认')
+        elif content_json['eventType'] == 'ConsumptionQuery':
+            print('余额查询', self.ip, content_json)
+
+            self.handle_query_ye_event(content_json)
+
+
+    def handel_image_data(self):
+        print('image处理'* 30)
+        self.fileinput(self.image_content, self.image_dict)
+        # image_id = self.image_dict['TransactionRecordEvent']['RecordImage']['resourcesContent']
+        # if image_id == self.content_id:
+        #     ...
+
+    @staticmethod
+    def get_content_type(content_type):
+        if 'xml' in content_type:
+            return 'XML'
+        if 'json' in content_type:
+            return 'JSON'
+        if 'image' in content_type:
+            return 'IMAGE'
+        if 'octet-stream' in content_type:
+            return 'OCTET-STREAM'
+        return None
+    @staticmethod
+    def get_content_length(data):
+        return int(data.split(ContentL).pop().split('\r\n')[0])
+    @staticmethod
+    def get_content_id(data):
+        return int(data.split(ContentID).pop().split('\r\n')[0])
+    @staticmethod
+    def get_content_disposition(data):
+        return data.split(ContentDt).pop().split('\r\n')[0] or ''
+    def reset_parse_data(self):
+        """重置消息处理类属性"""
+        self.content = ''
+        self.content_type = None
+        self.content_length = None
+        self.content_id = None
+        self.content_disposition = ''
+        self.image_content = b''
 
 
 class LongLink(threading.Thread):
@@ -343,16 +379,19 @@ class LongLink(threading.Thread):
         self.start_long_link()
 
     def start_long_link(self):
-        if not self.mt.threads[self.ids]:
+        if not self.mt.threads.get(self.ids):
             self.mt.threads[self.ids] = {}
         self.mt.threads[self.ids].update(LongLink=self)  # 更新成在线状态
+        self.mt.threads[self.ids]['query_obj']['sbip'] = self.ip  # 更新成在线状态
         try:
             with self.http_x.stream("GET", f"http://{self.ip}/ISAPI/Event/notification/alertStream",
                                     auth=self.http_x.DigestAuth(self.username, self.password),
-                                    timeout=50) as r:
-                for data in r.iter_bytes():
-                    self.parse_data.parse_data(data)
-                    print(data)
+                                    timeout=40) as r:
+                for line in r.iter_lines():
+                    if self.parse_data.process_line(line):
+                        continue  # 如果返回 True，跳过当前行
+                    self.parse_data.parse_data(line)
+
                     if self.kill:
                         self.mt.threads.pop(self.ids, '')
                         logger.warning('停止成功')
@@ -364,7 +403,6 @@ class LongLink(threading.Thread):
                     self.run()
                 else:
                     self.mt.threads.pop(self.ids, '')
-
                     return '停止成功'
         except RecursionError:
             logger.info('重连次数超过递归最大限制，退出重启！！！！！！！！！！！！')
@@ -387,6 +425,8 @@ class LongLink(threading.Thread):
             # traceback.print_exc()
             logger.warning(e)
             print('其他异常', str(e), self.ids, self.kill)
+            # 打印异常
+            traceback.print_exc()
             self.reset_parse_data()
             time.sleep(1.5)
             # 被动断网 保持重连
@@ -401,10 +441,12 @@ class LongLink(threading.Thread):
 
     def reset_parse_data(self):
         """重置消息处理类属性"""
+        self.parse_data.image_content = b''
         self.parse_data.content = b''
         self.parse_data.content_type = None
         self.parse_data.content_length = None
-
+        self.parse_data.content_id = None
+        self.parse_data.content_disposition = None
     @staticmethod
     def exit():
         pid = os.getpid()
@@ -443,42 +485,42 @@ class LongLink(threading.Thread):
         for item in result:
             ygid = item.get("ygid")
             ygmc = item.get("ygmc")
-            print("开始下发人脸", ygid, ygmc)
+            # print("开始下发人脸", ygmc, ygid)
 
-            picpath = f'{Config.rl_path}{ygid}.jpg'
-            if f"{ygid}.jpg" not in os.listdir(Config.rl_path):
-                try:
-                    img_res = self.http_x.get(f"{Config.pic_url}/return_pic_bytes/%s" % ygid,
-                                              headers={'Authorization': self.token}, timeout=self.timeout, verify=False)
-                except httpx.ReadTimeout:
-                    logger.warning(f"接口:{Config.pic_url}/return_pic_bytes/获取%s超时" % ygid)
-                except Exception as e:
-                    logger.warning(f"接口:{Config.pic_url}/return_pic_bytes/获取%s时：{str(e)}" % ygid)
-                else:
-                    if img_res.status_code != 200:
-                        logger.warning(f"接口:{Config.pic_url}/return_pic_bytes/没有%s的图片" % ygid)
-                        continue
-                    if img_res.read() != b'' and b'data' not in img_res.read() and b'!DOCTYPE' not in img_res.read():
-                        with open(picpath, "wb") as f:
-                            f.write(img_res.text.encode(encoding='ISO-8859-1'))
-                            f.close()
-            elif f"{ygid}.jpg" in os.listdir(Config.rl_path):
-                pic = self.mt.getPicByPath(picpath)
-                if pic:
-                    if self.handel_set_face_event(ygid, ygmc, pic):  # 无论成功都增加明细记录
-                        logger.info(f"设备id：{sbid}下发成功的员工{ygid, ygmc}")
-                        self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 1)
-                    else:
-                        logger.error(f"设备id：{sbid}下发失败的员工{ygid, ygmc}")
-                        # 下发失败的员工设备 把 isSuccess 改为0
-                        self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 0)
-                    os.remove(f"{Config.rl_path}/{ygid}.jpg")
-                else:
-                    logger.error(f'{ygid, ygmc}有需要下发的人脸，但是获取不到图片设备id：{sbid}')
-            else:
-                self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 0)
-                print(f"{ygid}-{ygmc}.jpg not in Config.rl_path the {Config.rl_path}")
-
+            # picpath = f'{Config.rl_path}{ygid}.jpg'
+            # if f"{ygid}.jpg" not in os.listdir(Config.rl_path):
+            #     try:
+            #         img_res = self.http_x.get(f"{Config.pic_url}/return_pic_bytes/%s" % ygid,
+            #                                   headers={'Authorization': self.token}, timeout=self.timeout, verify=False)
+            #     except httpx.ReadTimeout:
+            #         print("获取%s超时" % ygid)
+            #         logger.warning(f"接口:{Config.pic_url}/return_pic_bytes/获取%s超时" % ygid)
+            #     except Exception as e:
+            #         print("获取%s超时" % ygid)
+            #         logger.warning(f"接口:{Config.pic_url}/return_pic_bytes/获取%s时：{str(e)}" % ygid)
+            #     else:
+            #         if img_res.status_code != 200:
+            #             logger.warning(f"接口:{Config.pic_url}/return_pic_bytes/没有%s的图片" % ygid)
+            #             continue
+            #         if img_res.read() != b'' and b'data' not in img_res.read() and b'!DOCTYPE' not in img_res.read():
+            #             with open(picpath, "wb") as f:
+            #                 f.write(img_res.text.encode(encoding='ISO-8859-1'))
+            #                 f.close()
+            # if f"{ygid}.jpg" in os.listdir(Config.rl_path):
+            #     pic = self.mt.getPicByPath(picpath)
+            #     if pic:
+            #         if self.handel_set_face_event(ygid, ygmc, pic):  # 无论成功都增加明细记录
+            #             logger.info(f"设备id：{sbid}下发成功的员工{ygid, ygmc}")
+            #             self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 1)
+            #         else:
+            #             logger.error(f"设备id：{sbid}下发失败的员工{ygid, ygmc}")
+            #             # 下发失败的员工设备 把 isSuccess 改为0
+            #             self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 0)
+            #         # 不能跨磁盘
+            #         os.makedirs('/data/jpgbackup', exist_ok=True)
+            #         os.rename(f"{Config.rl_path}/{ygid}.jpg", f"/data/jpgbackup/{ygid}.jpg")
+            #     else:
+            #         logger.error(f'{ygid, ygmc}有需要下发的人脸，但是获取不到图片设备id：{sbid}')
 
     def delStaff(self):
         """通过ygid删除人脸"""
@@ -500,7 +542,7 @@ class LongLink(threading.Thread):
         :param Pic:
         :return:
         """
-        boundary = "-------------tyctyctyctyctyctyctyc"
+        boundary = "---------tyctyctyctyctyctyctyc"
         byte_pic = Pic.decode('ISO-8859-1')
         headers = {
             "Content-Type": "multipart/form-data; boundary=" + boundary,
@@ -693,18 +735,20 @@ class MachineThread:
                 try:
                     self.sbinfo = self.refresh_machine()
                 except:
-                    print('sadasd')
                     pass
                 print('未停用的', self.threads)
+
+                # 检查是否新增设备，有的话启动新线程
+                self.start_all_thread()
+
                 # 将停用的设备停止运行
                 for ids in self.get_deactivate_machine():
                     self.kill_thread(ids)
-                # 检查是否新增设备，有的话启动新线程
-                self.start_all_thread()
+
                 # 执行下发、删除人脸
                 try:
                     logger.info('开始下发人脸')
-                    # self.task_face()
+                    self.task_face()
                 except:
                     traceback.print_exc()
                     logger.error('下发人脸异常')
@@ -718,6 +762,7 @@ class MachineThread:
             logger.error(str(e))
             print(e)
             self.task_loop()
+
 
     def task_face(self):
         for obj in self.threads:
@@ -772,8 +817,7 @@ class MachineThread:
         for i in self.sbinfo.keys():
             item = self.sbinfo[i]
             if not item.get('query_obj').get('ty'):
-                if self.threads.get(i) and self.threads.get(i).get('LongLink') and item.get('sbip') == self.threads.get(
-                        i).get('query_obj', {}).get('sbip'):
+                if self.threads.get(i) and self.threads.get(i).get('LongLink'):
                     continue
                 self.add_machine(i, {"query_obj": item.get('query_obj')})
                 i_: LongLink = LongLink(ip=item.get('query_obj').get('sbip'),

@@ -125,7 +125,7 @@ class HKWSYGSBQYORM(BaseORM):
         :param serialNo:
         :return:
         """
-        sql = "select * from hkws_xf_xfmx where serialNo = %s AND sbip='%s' " % (serialNo, ipAddress)
+        sql = "select * from hkws_xf_xfmx where serialNo = %s AND sbip='%s'  " % (serialNo, ipAddress)
         result_set, column_list = self.sql_orm.query_data(sql)
         data_list = [dict(zip(column_list, row)) for row in result_set]
         return data_list

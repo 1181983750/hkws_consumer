@@ -13,6 +13,9 @@ class SingleFileUploadView(ViewSet):
         super(SingleFileUploadView, self).__init__()
         self.service = UploadServices(ImageFileds)
 
+    def test(self, request):
+        return JsonResponse(ResponseResult('测试').__call__())
+
     def singleFileUpload(self, request):
         """
         单一图片文件上传
