@@ -82,7 +82,7 @@ class ParseData:
         refundPayment = detail.get('refundPayment')
         name = detail.get('name')
         with lock:
-            result_list = self.HKWSYGSBQYORM.get_xfmx_by_serialNo(int(serialNo), str(self.ip), int(employeeNoString or 0))
+            result_list = self.HKWSYGSBQYORM.get_xfmx_by_serialNo(int(serialNo), str(self.ip))
         if type == "refund":
             # 消费退款
             refundPayment = detail.get('refundPayment')

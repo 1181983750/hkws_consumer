@@ -305,22 +305,19 @@ class ParseData:
         elif content_json['eventType'] == 'TransactionRecordEvent':
             self.image_dict = content_json
             self.handle_transaction_event(content_json)
-            print('交易确认')
         elif content_json['eventType'] == 'AccessControllerEvent':
             pass
         elif content_json['eventType'] == 'ConsumptionEvent':
             self.image_dict = content_json
             self.handle_consumption_event(content_json)
-            print('消费确认')
         elif content_json['eventType'] == 'ConsumptionQuery':
             print('余额查询', self.ip, content_json)
-
             self.handle_query_ye_event(content_json)
 
 
     def handel_image_data(self):
-        print('image处理'* 30)
-        self.fileinput(self.image_content, self.image_dict)
+        ...
+        # self.fileinput(self.image_content, self.image_dict)
         # image_id = self.image_dict['TransactionRecordEvent']['RecordImage']['resourcesContent']
         # if image_id == self.content_id:
         #     ...
