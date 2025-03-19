@@ -82,7 +82,6 @@ class ParseData:
         activePostCount = data.get('activePostCount')
         detail = data.get('TransactionRecordEvent')
         type = detail.get('type')
-        print(type)
         serialNo = detail.get('serialNo')
         employeeNoString = detail.get('employeeNoString')
         modeType = detail.get('modeType')
@@ -145,7 +144,6 @@ class ParseData:
                                          auth=self.auth,
                                          verify=False,
                                          params={'format': 'json'}, json=json_data_c)
-            print('退款RES', response_c.text, response_refund)
             logger.warning(f"退款确认回执{response_c.text}流水号:{serialNo}")
 
     def handle_consumption_event(self, data: dict):
@@ -281,6 +279,7 @@ class ParseData:
 
         if self.content_type == 'JSON':
             if self.content.find(boundary) != -1:
+                self.content = self.content.replace(boundary, '')
                 self.content = self.content[:self.content_length]
 
                 if self.content.endswith('-'):
@@ -387,6 +386,8 @@ class LongLink(threading.Thread):
                 for line in r.iter_lines():
                     if self.parse_data.process_line(line):
                         continue  # 如果返回 True，跳过当前行
+                    if not self.parse_data.content:
+                        self.parse_data.content = ''
                     self.parse_data.parse_data(line)
 
                     if self.kill:
