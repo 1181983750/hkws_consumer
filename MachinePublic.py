@@ -483,42 +483,42 @@ class LongLink(threading.Thread):
         for item in result:
             ygid = item.get("ygid")
             ygmc = item.get("ygmc")
-            # print("开始下发人脸", ygmc, ygid)
+            print("开始下发人脸", ygmc, ygid)
 
-            # picpath = f'{Config.rl_path}{ygid}.jpg'
-            # if f"{ygid}.jpg" not in os.listdir(Config.rl_path):
-            #     try:
-            #         img_res = self.http_x.get(f"{Config.pic_url}/return_pic_bytes/%s" % ygid,
-            #                                   headers={'Authorization': self.token}, timeout=self.timeout, verify=False)
-            #     except httpx.ReadTimeout:
-            #         print("获取%s超时" % ygid)
-            #         logger.warning(f"接口:{Config.pic_url}/return_pic_bytes/获取%s超时" % ygid)
-            #     except Exception as e:
-            #         print("获取%s超时" % ygid)
-            #         logger.warning(f"接口:{Config.pic_url}/return_pic_bytes/获取%s时：{str(e)}" % ygid)
-            #     else:
-            #         if img_res.status_code != 200:
-            #             logger.warning(f"接口:{Config.pic_url}/return_pic_bytes/没有%s的图片" % ygid)
-            #             continue
-            #         if img_res.read() != b'' and b'data' not in img_res.read() and b'!DOCTYPE' not in img_res.read():
-            #             with open(picpath, "wb") as f:
-            #                 f.write(img_res.text.encode(encoding='ISO-8859-1'))
-            #                 f.close()
-            # if f"{ygid}.jpg" in os.listdir(Config.rl_path):
-            #     pic = self.mt.getPicByPath(picpath)
-            #     if pic:
-            #         if self.handel_set_face_event(ygid, ygmc, pic):  # 无论成功都增加明细记录
-            #             logger.info(f"设备id：{sbid}下发成功的员工{ygid, ygmc}")
-            #             self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 1)
-            #         else:
-            #             logger.error(f"设备id：{sbid}下发失败的员工{ygid, ygmc}")
-            #             # 下发失败的员工设备 把 isSuccess 改为0
-            #             self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 0)
-            #         # 不能跨磁盘
-            #         os.makedirs('/data/jpgbackup', exist_ok=True)
-            #         os.rename(f"{Config.rl_path}/{ygid}.jpg", f"/data/jpgbackup/{ygid}.jpg")
-            #     else:
-            #         logger.error(f'{ygid, ygmc}有需要下发的人脸，但是获取不到图片设备id：{sbid}')
+            picpath = f'{Config.rl_path}{ygid}.jpg'
+            if f"{ygid}.jpg" not in os.listdir(Config.rl_path):
+                try:
+                    img_res = self.http_x.get(f"{Config.pic_url}/return_pic_bytes/%s" % ygid,
+                                              headers={'Authorization': self.token}, timeout=self.timeout, verify=False)
+                except httpx.ReadTimeout:
+                    print("获取%s超时" % ygid)
+                    logger.warning(f"接口:{Config.pic_url}/return_pic_bytes/获取%s超时" % ygid)
+                except Exception as e:
+                    print("获取%s超时" % ygid)
+                    logger.warning(f"接口:{Config.pic_url}/return_pic_bytes/获取%s时：{str(e)}" % ygid)
+                else:
+                    if img_res.status_code != 200:
+                        logger.warning(f"接口:{Config.pic_url}/return_pic_bytes/没有%s的图片" % ygid)
+                        continue
+                    if img_res.read() != b'' and b'data' not in img_res.read() and b'!DOCTYPE' not in img_res.read():
+                        with open(picpath, "wb") as f:
+                            f.write(img_res.text.encode(encoding='ISO-8859-1'))
+                            f.close()
+            if f"{ygid}.jpg" in os.listdir(Config.rl_path):
+                pic = self.mt.getPicByPath(picpath)
+                if pic:
+                    if self.handel_set_face_event(ygid, ygmc, pic):  # 无论成功都增加明细记录
+                        logger.info(f"设备id：{sbid}下发成功的员工{ygid, ygmc}")
+                        self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 1)
+                    else:
+                        logger.error(f"设备id：{sbid}下发失败的员工{ygid, ygmc}")
+                        # 下发失败的员工设备 把 isSuccess 改为0
+                        self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 0)
+                    # 不能跨磁盘
+                    os.makedirs('/data/jpgbackup', exist_ok=True)
+                    os.rename(f"{Config.rl_path}/{ygid}.jpg", f"/data/jpgbackup/{ygid}.jpg")
+                else:
+                    logger.error(f'{ygid, ygmc}有需要下发的人脸，但是获取不到图片设备id：{sbid}')
 
     def delStaff(self):
         """通过ygid删除人脸"""

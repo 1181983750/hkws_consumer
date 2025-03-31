@@ -47,16 +47,16 @@ class HKWSXFYGYEServices(BaseService):
         yemx_serializer = serializer(instance=yemx_query, many=True)
         obj = yemx_serializer.data
         if obj:
-            result = Decimal(obj[0].get('xfje'))  # 员工第一次的消费肯定是充值
+            result = Decimal(0)
             for index in range(obj.__len__()):
                 print(obj[index]['xfje'], obj[index]['ygid'])
                 dict_to_model = DictToModel(dict_data=obj[index], model_class=hkws_xf_xfmx)
                 hkws_xf_xfmx_model: hkws_xf_xfmx = dict_to_model.format_dict_data_to_model(True)
                 hkws_xf_xfmx_model.id = obj[index]['id']
-                if index != 0:  # 最早一次的余额是充值 是基准
-                    result += Decimal(obj[index]['xfje'])
-                    hkws_xf_xfmx_model.ye = result
-                    hkws_xf_xfmx_model.save()
+                result += Decimal(obj[index]['xfje'])
+                hkws_xf_xfmx_model.nonce = str(hkws_xf_xfmx_model.ye)
+                hkws_xf_xfmx_model.ye = result
+                hkws_xf_xfmx_model.save()
             assert self.orm.update_ygye(ygid, result), f'员工余额表没有初始化创建该员工id:{ygid}'
         else:
             return ResponseResult(msg=f'无该员工id{ygid}明细', code=-1, data={'ygid': ygid, 'ygye': 0})

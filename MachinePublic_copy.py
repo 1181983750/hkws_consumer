@@ -3,6 +3,8 @@ import os
 import platform
 import traceback
 
+from public.utils.sqlserver import SqlServerObject
+
 # from wxPush import WeChatPush
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'httpxs.settings')
