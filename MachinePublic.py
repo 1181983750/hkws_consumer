@@ -312,6 +312,14 @@ class ParseData:
         elif content_json['eventType'] == 'ConsumptionQuery':
             print('余额查询', self.ip, content_json)
             self.handle_query_ye_event(content_json)
+        elif content_json['eventType'] == 'topUpRequest':
+            print('消费机充值', self.ip)
+            actualPayment = int(content_json.get('topUpRequest').get('topUpPayment')) / 100,
+            balanceBeforeDeduct = int(content_json.get('topUpRequest').get('topUpPayment')) / 100,
+            name = content_json.get('topUpRequest').get('name'),
+            employeeNoString = content_json.get('topUpRequest').get('employeeNo')
+            print(actualPayment, balanceBeforeDeduct, name, employeeNoString)
+
 
 
     def handel_image_data(self):
