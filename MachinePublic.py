@@ -24,7 +24,7 @@ from httpAsyncClient.hkws_xf_xfmx.hkws_xf_xfmx_services import HKWSXFMXServices
 from httpAsyncClient.hkws_xf_ygye.HKWSXFYGYEORM import HKWSXFYGYEORM
 from public.utils.onlineTime import getBeijinTime
 from httpAsyncClient.rs_ygxx.RSYGXXORM import RSYGXXORM
-from httpAsyncClient.models import hkws_xf_sbmx, hkws_yg_sbqy, hkws_xf_xfmx, hkws_xf_ygye, rs_ygxx
+from httpAsyncClient.models import hkws_xf_sbmx, hkws_yg_sbqy, hkws_xf_xfmx, hkws_xf_ygye, rs_ygxx, hkws_xf_sbygxx
 from public.utils import EmployeesToBanlanceConstruction as EC
 from httpAsyncClient.Config import Config
 from httpAsyncClient.hkws_yg_sbqy.HKWSYGSBQYORM import HKWSYGSBQYORM
@@ -524,7 +524,8 @@ class LongLink(threading.Thread):
                         self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 0)
                     # 不能跨磁盘
                     os.makedirs('/data/jpgbackup', exist_ok=True)
-                    os.rename(f"{Config.rl_path}/{ygid}.jpg", f"/data/jpgbackup/{ygid}.jpg")
+                    if not hkws_xf_sbygxx.objects.filter(ygid=ygid, issuccess=0):
+                        os.rename(f"{Config.rl_path}/{ygid}.jpg", f"/data/jpgbackup/{ygid}.jpg")
                 else:
                     logger.error(f'{ygid, ygmc}有需要下发的人脸，但是获取不到图片设备id：{sbid}')
 
