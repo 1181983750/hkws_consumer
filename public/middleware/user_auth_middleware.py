@@ -67,7 +67,7 @@ class TokenAuthMiddleware(MiddlewareMixin):
             info.update(username=info['id'])
             print(info)
             qx_query = hkws_xf_user.objects.filter(username=info.get('username'))
-            if not qx_query:
+            if not qx_query and ('/xiaofeijiapi/User/getNoFaceYgxx/' in request.path or '/xiaofeijiapi/Recharge/' in request.path) and info.get('username') == '管理员':
                 return JsonResponse({"message": "你没有该权限", "code": -1, "data": {}})
             request.info = info
 

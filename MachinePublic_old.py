@@ -14,7 +14,7 @@ from public.utils.BaseOrm import DictToModel
 
 django.setup()
 
-logger = logging.getLogger('error')
+logger = logging.getLogger('error_old')
 
 import datetime
 
@@ -756,7 +756,7 @@ class MachineThread:
 
     def refresh_machine(self):
         """刷新获取所有消费机设备 并且放入容器"""
-        query_all = hkws_xf_sbmx.objects.filter(sblxid=4)
+        query_all = hkws_xf_sbmx.objects.filter(sblxid=4).exclude(bz__icontains='new')
         for obj in query_all:
             # 设备类型id 为 4是人脸消费机
             d = obj.__dict__
@@ -850,7 +850,7 @@ class MachineThread:
 
 def main():
     print("我是谁", os.getpid())
-    with open("pid.txt", 'w') as files:
+    with open("pid_old.txt", 'w') as files:
         files.write(str(os.getpid()))
     mt = MachineThread().get_instance()
     print('写入文件的process id:', os.getpid())

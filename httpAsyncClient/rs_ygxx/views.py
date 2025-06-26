@@ -1,5 +1,3 @@
-# Creation time: 2022/5/31 15:08
-# The author: Tiger_YC
 from django.db import transaction
 from django.http import JsonResponse
 from rest_framework.viewsets import ViewSet

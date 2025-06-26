@@ -21,6 +21,7 @@
                    `=---='
              佛祖保佑       永无BUG
 """
+import traceback
 from multiprocessing import Process
 import multiprocessing
 import os
@@ -29,6 +30,9 @@ import time
 import schedule
 import MachinePublic
 import psutil
+
+import MachinePublic_old
+
 
 # from wxPush import WeChatPush
 
@@ -45,13 +49,19 @@ class ScheduleJob:
 
     def __init__(self):
         self.machine_pid: int = 0
+        self.machine_pid_old: int = 0
         # noinspection PyTypeChecker
         self.machine_process: psutil.Process = None
+        self.machine_process_old: psutil.Process = None
 
     def is_zombie_process(self):
         # 判断是否是僵尸进程
         try:
-            return self.machine_process.status() == psutil.STATUS_ZOMBIE
+
+            return  (
+    self.machine_process.status() == psutil.STATUS_ZOMBIE
+    and self.machine_process_old.status() == psutil.STATUS_ZOMBIE
+)
         except psutil.NoSuchProcess:
             return False
 
@@ -63,6 +73,7 @@ class ScheduleJob:
             return False
         try:
             self.machine_process.terminate()  # 或者使用 process.kill() 来强制终止进程
+            self.machine_process_old.terminate()  # 或者使用 process.kill() 来强制终止进程
             return True
         except psutil.NoSuchProcess:
             return False
@@ -71,11 +82,16 @@ class ScheduleJob:
         """
         启动消费机工作进程
         """
-        print("I'm 正在重启进程...", self.machine_process, self.machine_pid)
         print("#" * 30)
         p1 = multiprocessing.Process(target=MachinePublic.main, args=())
+        p2 = multiprocessing.Process(target=MachinePublic_old.main, args=())
         p1.start()
-        print("#" * 30)
+        p2.start()
+        # 分别写入两个 PID 在各自脚本主方法里
+        self.machine_pid = p1.pid
+        self.machine_pid_old = p2.pid
+        print("I'm 正在重启进程...", self.machine_process, 'pid:', self.machine_pid, 'pid_old:', self.machine_pid_old)
+
 
     def check_machine_alive(self):
         """
@@ -87,9 +103,13 @@ class ScheduleJob:
         """
         with open("pid.txt", "r") as f:
             self.machine_pid = int(f.read())
+
+        with open("pid_old.txt", "r") as z:
+            self.machine_pid_old = int(z.read())
         try:
 
             self.machine_process = psutil.Process(self.machine_pid)
+            self.machine_process_old = psutil.Process(self.machine_pid_old)
             if self.kill_zombie_process():
                 # WeChatPush(server='已成僵尸进程, 准备重启').run()
                 # 是僵尸进程就杀死当前僵尸进程，然后重新启动
@@ -99,10 +119,12 @@ class ScheduleJob:
             # WeChatPush(server='进程意外退出').run()
             self.start_machine_process()
         except Exception as e:
+            traceback.print_exc()
             print("check_pid_alive函数报错", e)
             self.start_machine_process()
         else:
             print("存活pid:", self.machine_pid, psutil.Process(self.machine_pid))
+            print("存活pid:", self.machine_pid_old, psutil.Process(self.machine_pid_old))
 
 
 def main():

@@ -2,6 +2,7 @@ import logging
 import os
 import platform
 import pprint
+import re
 import traceback
 
 # from wxPush import WeChatPush
@@ -180,7 +181,7 @@ class ParseData:
 
         response = self.http_x.put(f"http://{self.ip}/ISAPI/Consume/consumptionEventConfirm", auth=self.auth,
                                    params={'format': 'json'}, json=json_data)
-        # print(f'{serialNo}消费事件回执：{response.text}', )
+        print(f'{serialNo}消费事件回执：{response.text}', )
         logger.warning(f'{serialNo}消费事件回执：{response.text}', )
 
     def parse_transactionRecord(self, amount: Decimal, Etype: EC, ygid: int, deviceInfo: dict, ygmc: str,
@@ -266,7 +267,6 @@ class ParseData:
             self.content_disposition = self.get_content_disposition(line)
             return True
 
-
     def parse_data(self, line: Union[str, bytes]):
         # 处理完成后:
         if not self.content_disposition:
@@ -276,26 +276,27 @@ class ParseData:
             self.image_content += line.encode()
         else:
             self.content += line
-
+        print(line)
         if self.content_type == 'JSON':
             if self.content.find(boundary) != -1:
                 self.content = self.content.replace(boundary, '')
                 self.content = self.content[:self.content_length]
-
-                if self.content.endswith('-'):
-                    self.content = self.content[:-1]
+                end_index = self.content.rfind('}')  # 找最后一个 } 的位置
+                if end_index != -1:
+                    self.content = self.content[:end_index + 1]
                 content_json = json.loads(self.content)
                 self.handel_json_data(content_json)
                 self.content = ''
-                self.content_length = None
+                self.content_length = 0
 
 
-        elif self.content_type == 'IMAGE':
+        if self.content_type == 'IMAGE':
             if self.content.find(boundary) != -1:
                 self.image_content = self.image_content[:self.content_length]
                 self.handel_image_data()
                 self.image_content = b''
-                self.content_length = None
+                self.content_length = 0
+
 
     def handel_json_data(self, content_json: dict):
         logger.info(f'我是:{self.ip}')
@@ -394,8 +395,10 @@ class LongLink(threading.Thread):
                 for line in r.iter_lines():
                     if self.parse_data.process_line(line):
                         continue  # 如果返回 True，跳过当前行
+
                     if not self.parse_data.content:
                         self.parse_data.content = ''
+
                     self.parse_data.parse_data(line)
 
                     if self.kill:
@@ -688,7 +691,7 @@ class LongLink(threading.Thread):
             return False
         logger.info(response.text)
         #        print(response.text)
-        if response.text.find("\"deleteUser\": true,") != -1:
+        if response.text.find("true") != -1:
             return True
         return False
 
@@ -798,7 +801,7 @@ class MachineThread:
 
     def refresh_machine(self):
         """刷新获取所有消费机设备 并且放入容器"""
-        query_all = hkws_xf_sbmx.objects.filter(sblxid=4)
+        query_all = hkws_xf_sbmx.objects.filter(sblxid=4, bz__icontains='new')
         for obj in query_all:
             # 设备类型id 为 4是人脸消费机
             d = obj.__dict__

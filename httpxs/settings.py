@@ -215,6 +215,9 @@ MEDIA_URL = "static_files/"
 import concurrent_log_handler
 
 log_path = os.path.join(BASE_DIR, "static_files/logs/nohup.log")
+
+log_path_old = os.path.join(BASE_DIR, "static_files/logs/nohup_old.log")
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -282,6 +285,17 @@ LOGGING = {
             'class': 'concurrent_log_handler.ConcurrentRotatingFileHandler',  # 保存到文件，自动切
             'filters': ['require_debug_false'],
             'filename': log_path,  # 日志文件
+            'maxBytes': 1024 * 1024 * 50,  # 日志大小 50M
+            'backupCount': 10,
+            'formatter': 'err_info',
+            'encoding': 'utf-8',
+        },
+        # 专门用来记错误日志
+        'error_old': {
+            'level': 'DEBUG',
+            'class': 'concurrent_log_handler.ConcurrentRotatingFileHandler',  # 保存到文件，自动切
+            'filters': ['require_debug_false'],
+            'filename': log_path_old,  # 日志文件
             'maxBytes': 1024 * 1024 * 50,  # 日志大小 50M
             'backupCount': 10,
             'formatter': 'err_info',
