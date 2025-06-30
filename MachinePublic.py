@@ -407,7 +407,8 @@ class LongLink(threading.Thread):
                         break
                 self.reset_parse_data()
                 print(self.ip, '# 被动断网 保持重连', self.kill, )
-                time.sleep(1.5)
+                time.sleep(10)
+
                 if not self.kill:
                     self.run()
                 else:
@@ -421,7 +422,7 @@ class LongLink(threading.Thread):
             # 清空所有数据，退出线程并且清空在线设备容器
             self.reset_parse_data()
             # 被动断网 保持重连
-            time.sleep(1.5)
+            time.sleep(10)
 
             if not self.kill:
                 logger.warning(f'{self.ip}长时间未读取到数据，被动断网 即将重连')
@@ -437,7 +438,8 @@ class LongLink(threading.Thread):
             # 打印异常
             traceback.print_exc()
             self.reset_parse_data()
-            time.sleep(1.5)
+            time.sleep(10)
+
             # 被动断网 保持重连
             if not self.kill:
                 # WeChatPush(server=f'消费机线程异常, 即将重连:{self.ip}').run()
@@ -898,7 +900,6 @@ def main():
     with open("pid.txt", 'w') as files:
         files.write(str(os.getpid()))
     mt = MachineThread().get_instance()
-    print('写入文件的process id:', os.getpid())
     try:
         # WeChatPush(server='进程重启成功').run()
         mt.refresh_machine()
