@@ -530,7 +530,10 @@ class LongLink(threading.Thread):
                     # 不能跨磁盘
                     os.makedirs('/data/jpgbackup', exist_ok=True)
                     if not hkws_xf_sbygxx.objects.filter(ygid=ygid, issuccess=0):
-                        os.rename(f"{Config.rl_path}/{ygid}.jpg", f"/data/jpgbackup/{ygid}.jpg")
+                        try:
+                            os.rename(f"{Config.rl_path}/{ygid}.jpg", f"/data/jpgbackup/{ygid}.jpg")
+                        except FileExistsError:
+                            os.rename(f"{Config.rl_path}/{ygid}.jpg", f"/data/jpgbackup/{ygid}--{getBeijinTime()}.jpg")
                 else:
                     logger.error(f'{ygid, ygmc}有需要下发的人脸，但是获取不到图片设备id：{sbid}')
 

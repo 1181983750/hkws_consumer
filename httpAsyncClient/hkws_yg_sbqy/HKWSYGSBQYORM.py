@@ -38,13 +38,20 @@ class HKWSYGSBQYORM(BaseORM):
         :param sbid:
         :return: list    字段： ygid
         """
-        sql = f"""select * from (select ygid from hkws_xf_sbygxx where sbid = {sbid}) as a
-                where a.ygid not in (
-                select a.ygid  from ykt_ickqy a
-                left join rs_ygxx b on a.ygid = b.id
-                join ykt_csh_ickqy c on c.id = a.qyid
-                join hkws_xf_sbmx e on e.sbickqyid = a.qyid
-                where b.sflz = 0 and e.ty = 0 and e.id = {sbid})"""
+        sql = f"""			SELECT a.ygid 
+                                        FROM hkws_xf_sbygxx a
+                                        WHERE a.sbid = {sbid}
+                                          AND NOT EXISTS (
+                                            SELECT 1 
+                                            FROM ykt_ickqy i
+                                            INNER JOIN rs_ygxx r ON i.ygid = r.id AND r.sflz = 0  -- 显式内联
+                                            INNER JOIN ykt_csh_ickqy c ON c.id = i.qyid
+                                            INNER JOIN hkws_xf_sbmx e 
+                                                ON e.sbickqyid = i.qyid 
+                                                AND e.ty = 0 
+                                                AND e.id = {sbid}     -- 过滤条件移到JOIN条件中
+                                            WHERE i.ygid = a.ygid -- 关联外层查询
+);"""
         result_set, column_list = self.sql_orm.query_data(sql)
         data_list = [dict(zip(column_list, row)) for row in result_set]
         return data_list
