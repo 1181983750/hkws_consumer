@@ -90,13 +90,15 @@ class HKWSXFMXORM(BaseORM):
         :return: tuple
         """
         if queryStr:
-            sql = f"""select a.ygid,b.ygdm,b.ygmc,b.pym,a.sbip,a.sjrq,a.czy,a.xflx,a.xflxmc,a.xfje,a.ye from hkws_xf_xfmx a 
+            sql = f"""select a.ygid,b.ygdm,b.ygmc,b.pym,a.sbip,a.sjrq,a.czy,a.xflx,a.xflxmc,a.xfje,a.ye, c.sbmc  from hkws_xf_xfmx a 
                                     left join rs_ygxx b on a.ygid = b.id 
+                                    left join hkws_xf_sbmx c on a.sbip=c.sbip
                                     where a.sjrq >= '{dateStart}' and a.sjrq <= '{dateEnd}' and xflx = 1 
                                     and (b.ygdm like '%{queryStr}%' or b.id like '%{queryStr}%' or b.ygmc like '%{queryStr}%' or b.pym like '%{queryStr}%') ORDER BY a.sjrq desc"""
         else:
-            sql = f"""select a.ygid,b.ygdm,b.ygmc,b.pym,a.sbip,a.sjrq,a.czy,a.xflx,a.xflxmc,a.xfje,a.ye from hkws_xf_xfmx a 
+            sql = f"""select a.ygid,b.ygdm,b.ygmc,b.pym,a.sbip,a.sjrq,a.czy,a.xflx,a.xflxmc,a.xfje,a.ye, c.sbmc  from hkws_xf_xfmx a 
                         left join rs_ygxx b on a.ygid = b.id 
+                        left join hkws_xf_sbmx c on a.sbip=c.sbip
                         where a.sjrq >= '{dateStart}' and  a.sjrq <= '{dateEnd}' and xflx = 1 ORDER BY a.sjrq desc"""
         result_set, column_list = self.sql_orm.query_data(sql)
         return result_set, column_list
