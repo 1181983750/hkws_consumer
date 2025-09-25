@@ -276,7 +276,7 @@ class ParseData:
             self.image_content += line.encode()
         else:
             self.content += line
-        print(line)
+        # print(line)
         if self.content_type == 'JSON':
             if self.content.find(boundary) != -1:
                 self.content = self.content.replace(boundary, '')

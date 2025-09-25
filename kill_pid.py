@@ -32,8 +32,12 @@ import MachinePublic
 import psutil
 
 import MachinePublic_old
+from httpAsyncClient.models import hkws_xf_sbmx
 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'httpxs.settings')
+import django
 
+django.setup()
 # from wxPush import WeChatPush
 
 
@@ -99,25 +103,23 @@ class ScheduleJob:
         启动消费机工作进程
         """
         print("#" * 30)
-
-        try:
-            psutil.Process(self.machine_pid)
-        except Exception:
-            p1 = multiprocessing.Process(target=MachinePublic_old.main, args=())
-            p1.start()
-            self.machine_pid = p1.pid
-            print("I'm 正在重启进程...", self.machine_process, 'pid:', self.machine_pid)
-        try:
-            psutil.Process(self.machine_pid_old)
-        except Exception:
-            p2 = multiprocessing.Process(target=MachinePublic_old.main, args=())
-            p2.start()
-            self.machine_pid_old = p2.pid
-            print("I'm 正在重启进程...", self.machine_process_old, 'pid_old:', self.machine_pid_old)
-
-
-
-        # 分别写入两个 PID 在各自脚本主方法里
+        query_all = hkws_xf_sbmx.objects.filter(sblxid=4, ty=0)
+        if query_all.filter(bz__icontains='new').exists():
+            try:
+                psutil.Process(self.machine_pid)
+            except Exception:
+                p1 = multiprocessing.Process(target=MachinePublic.main, args=())
+                p1.start()
+                self.machine_pid = p1.pid
+                print("I'm 正在重启进程...", self.machine_process, 'pid:', self.machine_pid)
+        if query_all.exclude(bz__icontains='new').exists():
+            try:
+                psutil.Process(self.machine_pid_old)
+            except Exception:
+                p2 = multiprocessing.Process(target=MachinePublic_old.main, args=())
+                p2.start()
+                self.machine_pid_old = p2.pid
+                print("I'm 正在重启进程...", self.machine_process_old, 'pid_old:', self.machine_pid_old)
 
 
     def check_machine_alive(self):
@@ -168,7 +170,7 @@ def main():
     print("开始运行父进程", os.getpid())
     SJ = ScheduleJob()
     SJ.check_machine_alive()
-    schedule.every(360).seconds.do(SJ.check_machine_alive)  # 每隔3秒检查进程是否存活
+    schedule.every(30).seconds.do(SJ.check_machine_alive)  # 每隔3秒检查进程是否存活
     # 每天的特定时间执行任务
     # schedule.every(1).day.at("08:00").do(WeChatPush(server='每日自检').check)
     while True:
