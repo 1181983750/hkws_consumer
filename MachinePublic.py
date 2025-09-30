@@ -780,6 +780,8 @@ class MachineThread:
 
 
     def task_face(self):
+        hkws_xf_sbygxx.objects.filter(issuccess=0).delete()
+
         for obj in self.threads:
             try:
                 _lk: LongLink = self.threads[obj]['LongLink']
