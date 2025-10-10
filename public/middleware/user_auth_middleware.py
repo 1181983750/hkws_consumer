@@ -35,8 +35,13 @@ class TokenAuthMiddleware(MiddlewareMixin):
     def process_request(self, request, salt=CG_ERP_KEY):
         # 如果为下面的两个请求不做任何处理 return可以终止函数
         # print(request.path)
-
-        if request.path == '/user/login/' or request.path == '/docs/' or '/static_files/file/' in request.path:
+        EXEMPT_PATHS = [
+            '/user/login/',
+            '/docs/',
+            '/static_files/file/',
+            '/image/postBase64/',
+        ]
+        if request.path in EXEMPT_PATHS:
             pass
         else:
             # 从cookies中找ticket

@@ -13,6 +13,7 @@ class SingleFileUploadView(ViewSet):
         super(SingleFileUploadView, self).__init__()
         self.service = UploadServices(ImageFileds)
 
+
     def test(self, request):
         return JsonResponse(ResponseResult('测试').__call__())
 
@@ -55,5 +56,6 @@ class SingleFileUploadView(ViewSet):
         filename = f"{ygid}.jpg"
         result_response = self.service.upload_base64_image(base64_file, filename)
         return JsonResponse(result_response.__call__())
+
 
 

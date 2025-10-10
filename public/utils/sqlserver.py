@@ -16,8 +16,11 @@ class SqlServerObject:
         return [table_field for table_field in self._cursor]
 
     # 查询数据
-    def query_data(self, sql):
-        self._cursor.execute(sql)
+    def query_data(self, sql, params=None):
+        if params:
+            self._cursor.execute(sql, params)
+        else:
+            self._cursor.execute(sql)
         cols = self._cursor.description  # 获取列名
         column_list = []
         for column in cols:

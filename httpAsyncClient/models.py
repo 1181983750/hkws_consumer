@@ -28,6 +28,7 @@ class hkws_xf_sbygxx(BaseModel,models.Model):
     ygid = models.IntegerField(db_column='ygid', blank=True, null=True, verbose_name='员工id', )
     sbid = models.IntegerField(db_column='sbid', blank=True, null=True, verbose_name='设备id', )
     issuccess = models.BooleanField(db_column='issuccess', blank=True, null=True, verbose_name='是否下发成功 1生效、0失效', )
+    reason = models.CharField(db_column='reason', max_length=255, blank=True, null=True, verbose_name='下发失败原因', )
 
     class Meta:
         db_table = 'hkws_xf_sbygxx'

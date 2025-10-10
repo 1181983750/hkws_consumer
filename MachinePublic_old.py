@@ -387,7 +387,8 @@ class LongLink(threading.Thread):
 
             if not self.kill:
                 logger.warning(f'{self.ip}长时间未读取到数据，被动断网 即将重连')
-                self.exit()
+                self.run()
+                # self.exit()
             else:
                 # WeChatPush(server=f'消费机线程停止成功{self.ip}').run()
                 self.mt.threads.pop(self.ids, '')
@@ -734,6 +735,8 @@ class MachineThread:
 
 
     def task_face(self):
+        hkws_xf_sbygxx.objects.filter(issuccess=0).delete()
+
         for obj in self.threads:
             try:
                 _lk: LongLink = self.threads[obj]['LongLink']
