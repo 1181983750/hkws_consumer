@@ -74,7 +74,11 @@ class UploadServices(BaseService):
             files = file.read()
 
         result_list = []
-        for i in self.get_need_set_face_area_status_by_employee(ygid):
+        consumer_area = self.get_need_set_face_area_status_by_employee(ygid)
+        if not consumer_area:
+            return ResponseResult(msg='下发失败, 该员工还未维护食堂消费区域', code=0)
+
+        for i in consumer_area:
             result = self.handel_set_face_event(i['ygid'], i['ygmc'], files, i['sbip'], i['username'], i['password'])
             if result:
                 hkws_xf_sbygxx.objects.filter(ygid=ygid, sbid=i['sbid'], issuccess=0).delete()
