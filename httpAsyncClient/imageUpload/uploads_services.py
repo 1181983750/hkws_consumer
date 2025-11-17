@@ -74,6 +74,7 @@ class UploadServices(BaseService):
             files = file.read()
 
         result_list = []
+        print(ygid)
         consumer_area = self.get_need_set_face_area_status_by_employee(ygid)
         if not consumer_area:
             return ResponseResult(msg='下发失败, 该员工还未维护食堂消费区域', code=0)
@@ -82,11 +83,20 @@ class UploadServices(BaseService):
             result = self.handel_set_face_event(i['ygid'], i['ygmc'], files, i['sbip'], i['username'], i['password'])
             if result:
                 hkws_xf_sbygxx.objects.filter(ygid=ygid, sbid=i['sbid'], issuccess=0).delete()
-                hkws_xf_sbygxx.objects.create(ygid=ygid, sbid=i['sbid'], issuccess=1)
+                if i['issuccess'] == 1:
+                    if hkws_xf_sbygxx.objects.filter(ygid=ygid, sbid=i['sbid'], issuccess=1):
+                        ...
+                    else:
+                        hkws_xf_sbygxx.objects.create(ygid=ygid, sbid=i['sbid'], issuccess=1)
+
 
             result_list.append(result)
+
         if not all(result_list):
+            print('下发失败')
             return ResponseResult(msg='下发失败', code=0)
+
+        print('下发成功')
         return ResponseResult(msg='下发成功', code=1)
     @staticmethod
     def handel_set_face_event(ygid: int, ygmc: str, Pic: bytes, ip, username, password) -> bool:
@@ -188,8 +198,7 @@ class UploadServices(BaseService):
                 LEFT JOIN rs_ygxx b ON a.ygid = b.id
                 LEFT JOIN hkws_xf_sbmx c ON a.sbid = c.id 
             WHERE
-                a.issuccess = 0 
-                AND c.ty = 0 
+                c.ty = 0 
                 AND b.sflz = 0 
                 AND c.ty = 0 
                 AND a.ygid=%s

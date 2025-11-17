@@ -48,7 +48,8 @@ class SingleFileUploadView(ViewSet):
         :return:
         """
         now = getBeijinTime()[0]
-        ygid = request.data.get('ygid')
+        # 老朱在post里才取得到
+        ygid = request.POST.get('ygid') or request.data.get('ygid')
         base64_file = request.data.get('base64pic')
         if not all([ygid, base64_file]):
             return JsonResponse(ResponseResult('不全啊数据')())

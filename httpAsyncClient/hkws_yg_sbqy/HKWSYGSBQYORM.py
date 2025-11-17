@@ -64,7 +64,7 @@ class HKWSYGSBQYORM(BaseORM):
         :param isSuccess:
         :return:
         """
-        sql = "insert into hkws_xf_sbygxx values(%s,%s,%s)" % (ygid, sbid, isSuccess)
+        sql = "INSERT INTO hkws_xf_sbygxx (ygid, sbid, issuccess) VALUES (%s, %s, %s)" % (ygid, sbid, isSuccess)
         try:
             self.sql_orm.insert_data(sql)  # 已经有事务回滚了
         except:
