@@ -65,6 +65,8 @@ class ScheduleJob:
             return self.machine_process.status() == psutil.STATUS_ZOMBIE
         except psutil.NoSuchProcess:
             return False
+        except Exception:
+            return False
 
     def is_zombie_process_old(self):
         # 判断是否是僵尸进程
@@ -72,6 +74,8 @@ class ScheduleJob:
 
             return self.machine_process_old.status() == psutil.STATUS_ZOMBIE
         except psutil.NoSuchProcess:
+            return False
+        except Exception:
             return False
 
     def kill_zombie_process(self):
@@ -85,6 +89,8 @@ class ScheduleJob:
             return True
         except psutil.NoSuchProcess:
             return False
+        except Exception:
+            return False
 
     def kill_zombie_process_old(self):
         """
@@ -96,6 +102,8 @@ class ScheduleJob:
             self.machine_process_old.terminate()  # 或者使用 process.kill() 来强制终止进程
             return True
         except psutil.NoSuchProcess:
+            return False
+        except Exception:
             return False
 
     def start_machine_process(self):

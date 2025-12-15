@@ -305,18 +305,24 @@ LOGGING = {
     # 日志对象
     'loggers': {
         'django': {
-            'handlers': ['console', 'file', 'error'],  #
-            'propagate': True,  # 是否让日志信息继续冒泡给其他的日志处理系统，一般为Ture ,不保证其他第三方模块有记录
+            'handlers': ['console', 'file', 'error'],
+            'propagate': True,
         },
         'log': {
             'handlers': ['info', 'console'],
             'level': 'INFO',
-            'propagate': True
+            'propagate': True,
         },
         'error': {
             'handlers': ['console', 'file', 'error'],
             'level': 'DEBUG',
             'propagate': True
         },
+        'error_old': {  # 🔥 新增
+            'handlers': ['error_old'],
+            'level': 'DEBUG',
+            'propagate': True,  # 防止冒泡到 root 造成重复日志
+        },
     }
+
 }

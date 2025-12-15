@@ -3,6 +3,7 @@ import os
 import platform
 import pprint
 import re
+import shutil
 import traceback
 
 # from wxPush import WeChatPush
@@ -98,9 +99,7 @@ class ParseData:
                 response_refund = self.parse_transactionRecord(amount=Decimal(refundPayment) / Decimal(100),
                                                                Etype=EC.REFUND,
                                                                ygid=int(employeeNoString),
-                                                               deviceInfo=
-                                                               self.HKWSYGSBQYORM.QueryDeviceInformationByIp(self.ip)[
-                                                                   0],
+                                                               deviceInfo=self._get_device_info(),
                                                                ygmc=name, xfrq=dateTime, serialNo=serialNo,
                                                                verifyMode=verifyMode,
                                                                username=name)
@@ -114,9 +113,7 @@ class ParseData:
                 response_transaction = self.parse_transactionRecord(amount=Decimal(actualPayment) / Decimal(100),
                                                                     Etype=EC.DEDUCTION,
                                                                     ygid=int(employeeNoString),
-                                                                    deviceInfo=
-                                                                    self.HKWSYGSBQYORM.QueryDeviceInformationByIp(
-                                                                        self.ip)[0],
+                                                                    deviceInfo=self._get_device_info(),
                                                                     ygmc=name, xfrq=dateTime, serialNo=serialNo,
                                                                     verifyMode=verifyMode,
                                                                     username=name)
@@ -244,6 +241,14 @@ class ParseData:
         response = self.http_x.put(f"http://{self.ip}/ISAPI/Consume/localQueryResult", auth=self.auth,
                                    params={'format': 'json'}, json=json_data)
         logger.warning(response.read())
+    def _get_device_info(self) -> dict:
+        try:
+            arr = self.HKWSYGSBQYORM.QueryDeviceInformationByIp(self.ip)
+        except Exception:
+            arr = []
+        if isinstance(arr, list) and arr:
+            return arr[0]
+        return {"sbip": self.ip}
 
     def process_line(self, line: str):
         if line.strip() == '':
@@ -391,7 +396,7 @@ class LongLink(threading.Thread):
         try:
             with self.http_x.stream("GET", f"http://{self.ip}/ISAPI/Event/notification/alertStream",
                                     auth=self.http_x.DigestAuth(self.username, self.password),
-                                    timeout=40) as r:
+                                    timeout=48) as r:
                 for line in r.iter_lines():
                     if self.parse_data.process_line(line):
                         continue  # 如果返回 True，跳过当前行
@@ -407,30 +412,30 @@ class LongLink(threading.Thread):
                         break
                 self.reset_parse_data()
                 print(self.ip, '# 被动断网 保持重连', self.kill, )
-                time.sleep(10)
+                time.sleep(100)
 
                 if not self.kill:
-                    self.run()
+                    self.start_long_link()
                 else:
                     self.mt.threads.pop(self.ids, '')
                     return '停止成功'
         except RecursionError:
+            time.sleep(100)
             logger.info('重连次数超过递归最大限制，退出重启！！！！！！！！！！！！')
             self.exit()
+
         except httpx.ReadTimeout:
             print('长时间未读取到数据')
             # 清空所有数据，退出线程并且清空在线设备容器
             self.reset_parse_data()
             # 被动断网 保持重连
-            time.sleep(10)
+            time.sleep(100)
 
-            if not self.kill:
+            if self.kill:
                 logger.warning(f'{self.ip}长时间未读取到数据，被动断网 即将重连')
                 self.exit()
             else:
-                # WeChatPush(server=f'消费机线程停止成功{self.ip}').run()
-                self.mt.threads.pop(self.ids, '')
-                return '停止成功'
+                self.start_long_link()
         except Exception as e:
             # traceback.print_exc()
             logger.warning(e)
@@ -438,13 +443,13 @@ class LongLink(threading.Thread):
             # 打印异常
             traceback.print_exc()
             self.reset_parse_data()
-            time.sleep(10)
+            time.sleep(100)
 
             # 被动断网 保持重连
             if not self.kill:
                 # WeChatPush(server=f'消费机线程异常, 即将重连:{self.ip}').run()
                 logger.warning(f'{self.ip}异常 即将重连:{str(e), self.kill}')
-                self.run()
+                self.start_long_link()
 
             else:
                 self.mt.threads.pop(self.ids, '')
@@ -460,12 +465,15 @@ class LongLink(threading.Thread):
         self.parse_data.content_disposition = None
     @staticmethod
     def exit():
-        pid = os.getpid()
+        pid = None
+        with open("pid.txt", 'r') as files:
+            pid = files.read().strip()
+
         sys_name = platform.system()
         if sys_name == 'Windows':
             os.system('taskkill /f /t /im {pid}'.format(pid=pid))
         elif sys_name == 'Linux':
-            os.system('kill -9 {pid}'.format(pid=pid))
+            os.system('kill -15 {pid}'.format(pid=pid))
         # WeChatPush(server=f'消费机进程退出').run()
 
     def stop(self):
@@ -528,12 +536,16 @@ class LongLink(threading.Thread):
                         # 下发失败的员工设备 把 isSuccess 改为0
                         self.HKWSYGSBQYORM.add_staff_record(ygid, sbid, 0)
                     # 不能跨磁盘
-                    os.makedirs('/data/jpgbackup', exist_ok=True)
+                    backup_dir = os.path.join(Config.rl_path, 'jpgbackup') if platform.system() == 'Windows' else '/data/jpgbackup'
+                    os.makedirs(backup_dir, exist_ok=True)
                     if not hkws_xf_sbygxx.objects.filter(ygid=ygid, issuccess=0):
-                        try:
-                            os.rename(f"{Config.rl_path}/{ygid}.jpg", f"/data/jpgbackup/{ygid}.jpg")
-                        except FileExistsError:
-                            os.rename(f"{Config.rl_path}/{ygid}.jpg", f"/data/jpgbackup/{ygid}--{getBeijinTime()}.jpg")
+                        src = os.path.join(Config.rl_path, f"{ygid}.jpg")
+                        dst = os.path.join(backup_dir, f"{ygid}.jpg")
+                        if os.path.exists(dst):
+                            ts = getBeijinTime()[1]
+                            safe_ts = ts.split('.')[0].replace(':', '-').replace(' ', '_')
+                            dst = os.path.join(backup_dir, f"{ygid}--{safe_ts}.jpg")
+                        shutil.move(src, dst)
                 else:
                     logger.error(f'{ygid, ygmc}有需要下发的人脸，但是获取不到图片设备id：{sbid}')
 
@@ -833,10 +845,15 @@ class MachineThread:
             return False
         for i in self.sbinfo.keys():
             item = self.sbinfo[i]
-            if not item.get('query_obj').get('ty'):
-                if self.threads.get(i) and self.threads.get(i).get('LongLink'):
+            if not self._is_deactivated(item.get('query_obj').get('ty')):
+                existing = self.threads.get(i)
+                tl = existing.get('LongLink') if existing else None
+                if tl and tl.is_alive():
                     continue
-                self.add_machine(i, {"query_obj": item.get('query_obj')})
+                if existing:
+                    existing['query_obj'] = item.get('query_obj')
+                else:
+                    self.add_machine(i, {"query_obj": item.get('query_obj')})
                 i_: LongLink = LongLink(ip=item.get('query_obj').get('sbip'),
                                         username=item.get('query_obj').get('userid'),
                                         password=item.get('query_obj').get('password'),
@@ -851,7 +868,7 @@ class MachineThread:
         """
         activate_machines = []
         for machine in self.sbinfo:
-            if self.sbinfo[machine]['query_obj']['ty'] == False:
+            if not self._is_deactivated(self.sbinfo[machine]['query_obj'].get('ty')):
                 activate_machines.append({machine: self.sbinfo[machine]})
         return activate_machines
 
@@ -863,8 +880,9 @@ class MachineThread:
         deactivate_machines = []
         for machine in self.sbinfo:
             try:
-                if self.sbinfo[machine]['query_obj']['ty'] or self.sbinfo[machine]['query_obj']['sbip'] != \
-                        self.get_online_thread()[machine]['query_obj'].get('sbip'):
+                q = self.sbinfo[machine].get('query_obj', {})
+                online_q = self.get_online_thread().get(machine, {}).get('query_obj', {})
+                if self._is_deactivated(q.get('ty')) or q.get('sbip') != online_q.get('sbip'):
                     deactivate_machines.append(machine)
             except Exception:
                 LongLink.exit()
@@ -886,6 +904,20 @@ class MachineThread:
                 logger.info(f'{self.threads[ids]}停用设备关闭成功')
         except Exception as e:
             LongLink.exit()
+    def _is_deactivated(self, ty_val):
+        if isinstance(ty_val, bool):
+            return ty_val
+        if ty_val is None:
+            return False
+        if isinstance(ty_val, int):
+            return ty_val != 0
+        if isinstance(ty_val, str):
+            v = ty_val.strip().lower()
+            if v in ('', '0', 'false', 'f', 'no', 'n'):
+                return False
+            if v in ('1', 'true', 't', 'yes', 'y'):
+                return True
+        return bool(ty_val)
 
     def getPicByPath(self, picpath) -> bytes:
         """
