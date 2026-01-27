@@ -37,7 +37,7 @@ class Config:
     rl_path = "static_files/images/"
 
     #下发人脸等 脚本运行检查轮询时间  单位 秒
-    poll_time: int = 60
+    poll_time: int = 90
 
     #下发人脸图片获取接口
     #pic_url = "http://172.17.18.2:18080"

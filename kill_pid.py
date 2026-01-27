@@ -142,14 +142,16 @@ class ScheduleJob:
             with open("pid.txt", "w") as f:
                 f.write("0")
 
-        if not os.path.isfile("pid.txt"):
+        if not os.path.isfile("pid_old.txt"):
             with open("pid_old.txt", "w") as f:
                 f.write("0")
         with open("pid.txt", "r") as f:
-            self.machine_pid = int(f.read())
+            pid_value = f.read().strip()
+            self.machine_pid = int(pid_value) if pid_value.isdigit() else 0
 
         with open("pid_old.txt", "r") as f:
-            self.machine_pid_old = int(f.read())
+            pid_old_value = f.read().strip()
+            self.machine_pid_old = int(pid_old_value) if pid_old_value.isdigit() else 0
         try:
             self.machine_process = psutil.Process(self.machine_pid)
             self.machine_process_old = psutil.Process(self.machine_pid_old)

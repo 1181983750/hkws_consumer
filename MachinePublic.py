@@ -391,69 +391,50 @@ class LongLink(threading.Thread):
     def start_long_link(self):
         if not self.mt.threads.get(self.ids):
             self.mt.threads[self.ids] = {}
-        self.mt.threads[self.ids].update(LongLink=self)  # 更新成在线状态
-        self.mt.threads[self.ids]['query_obj']['sbip'] = self.ip  # 更新成在线状态
-        try:
-            with self.http_x.stream("GET", f"http://{self.ip}/ISAPI/Event/notification/alertStream",
-                                    auth=self.http_x.DigestAuth(self.username, self.password),
-                                    timeout=48) as r:
-                for line in r.iter_lines():
-                    if self.parse_data.process_line(line):
-                        continue  # 如果返回 True，跳过当前行
+        self.mt.threads[self.ids].update(LongLink=self)
+        self.mt.threads[self.ids]['query_obj']['sbip'] = self.ip
+        while True:
+            try:
+                with self.http_x.stream("GET", f"http://{self.ip}/ISAPI/Event/notification/alertStream",
+                                        auth=self.http_x.DigestAuth(self.username, self.password),
+                                        timeout=48) as r:
+                    for line in r.iter_lines():
+                        if self.parse_data.process_line(line):
+                            continue
 
-                    if not self.parse_data.content:
-                        self.parse_data.content = ''
+                        if not self.parse_data.content:
+                            self.parse_data.content = ''
 
-                    self.parse_data.parse_data(line)
+                        self.parse_data.parse_data(line)
 
-                    if self.kill:
-                        self.mt.threads.pop(self.ids, '')
-                        logger.warning('停止成功')
-                        break
+                        if self.kill:
+                            self.mt.threads.pop(self.ids, '')
+                            logger.warning('停止成功')
+                            return '停止成功'
                 self.reset_parse_data()
                 print(self.ip, '# 被动断网 保持重连', self.kill, )
                 time.sleep(100)
-
-                if not self.kill:
-                    self.start_long_link()
-                else:
+                if self.kill:
                     self.mt.threads.pop(self.ids, '')
                     return '停止成功'
-        except RecursionError:
-            time.sleep(100)
-            logger.info('重连次数超过递归最大限制，退出重启！！！！！！！！！！！！')
-            self.exit()
-
-        except httpx.ReadTimeout:
-            print('长时间未读取到数据')
-            # 清空所有数据，退出线程并且清空在线设备容器
-            self.reset_parse_data()
-            # 被动断网 保持重连
-            time.sleep(100)
-
-            if self.kill:
-                logger.warning(f'{self.ip}长时间未读取到数据，被动断网 即将重连')
-                self.exit()
-            else:
-                self.start_long_link()
-        except Exception as e:
-            # traceback.print_exc()
-            logger.warning(e)
-            print('其他异常', str(e), self.ids, self.kill)
-            # 打印异常
-            traceback.print_exc()
-            self.reset_parse_data()
-            time.sleep(100)
-
-            # 被动断网 保持重连
-            if not self.kill:
-                # WeChatPush(server=f'消费机线程异常, 即将重连:{self.ip}').run()
+            except httpx.ReadTimeout:
+                print('长时间未读取到数据')
+                self.reset_parse_data()
+                time.sleep(100)
+                if self.kill:
+                    logger.warning(f'{self.ip}长时间未读取到数据，被动断网 即将重连')
+                    self.exit()
+                    return '停止成功'
+            except Exception as e:
+                logger.warning(e)
+                print('其他异常', str(e), self.ids, self.kill)
+                traceback.print_exc()
+                self.reset_parse_data()
+                time.sleep(100)
+                if self.kill:
+                    self.mt.threads.pop(self.ids, '')
+                    return '停止成功'
                 logger.warning(f'{self.ip}异常 即将重连:{str(e), self.kill}')
-                self.start_long_link()
-
-            else:
-                self.mt.threads.pop(self.ids, '')
-                return '停止成功'
 
     def reset_parse_data(self):
         """重置消息处理类属性"""
@@ -763,7 +744,7 @@ class MachineThread:
                     self.sbinfo = self.refresh_machine()
                 except:
                     pass
-                print('未停用的', self.threads)
+                logger.info('未停用的 %s', self.threads)
 
                 # 检查是否新增设备，有的话启动新线程
                 self.start_all_thread()
@@ -781,7 +762,7 @@ class MachineThread:
                     logger.error('下发人脸异常')
                 # 打印存活线程
                 # logger.info(f'共计：{threading.active_count()}个线程正在运行，存活的线程{self.get_online_thread()}')
-                print('有', threading.active_count(), '个线程正在运行', threading.enumerate())
+                logger.info('有 %s 个线程正在运行 %s', threading.active_count(), threading.enumerate())
                 if threading.active_count() == 1:
                     LongLink.exit()
                 time.sleep(Config.poll_time)
