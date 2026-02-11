@@ -81,7 +81,7 @@ class ParseData:
         employeeNoString = detail.get('employeeNoString')
         modeType = detail.get('modeType')
         verifyMode = detail.get('verifyMode')
-        # mode = detail.get('mode')
+        mode = detail.get('mode')
         refundPayment = detail.get('refundPayment')
         name = detail.get('name')
         with lock:
@@ -104,7 +104,7 @@ class ParseData:
             actualPayment = detail.get('actualPayment')
             if not result_list:
                 # 没有该serialNo记录 开始处理 消费
-                response_transaction = self.parse_transactionRecord(amount=Decimal(actualPayment) / Decimal(100),
+                response_transaction = self.parse_transactionRecord(amount=Decimal(actualPayment) / Decimal(100)  if mode != 'count' else 0,
                                                                     Etype=EC.DEDUCTION,
                                                                     ygid=int(employeeNoString),
                                                                     deviceInfo=self._get_device_info(),
@@ -138,22 +138,38 @@ class ParseData:
         employeeNoString = detail.get('employeeNoString')
         name = detail.get('name')
         type = detail.get('type')
+        mode = detail.get('mode')
         totalPayment = detail.get('totalPayment')
         ye: Decimal = self.HKWSXFYGYEORM.get_ye_by_ygid(employeeNoString).ye
         handel_ye: Decimal = (ye if ye else Decimal(0)) * Decimal(100)
         result = 'success' if handel_ye >= Decimal(totalPayment) else 'balanceNotEnough'
+        # 小数点处理
         balanceBeforeDeduct = str(handel_ye).split(".")[0]
+       # 处理完提交数据:
         json_data = {'ConsumptionEventConfirm': {}}
         json_data['ConsumptionEventConfirm'].update(serialNo=serialNo,
-                                                    result=result,
-                                                    mode="amount",
-                                                    actualPayment=totalPayment,
+                                                    mode=mode,
                                                     balanceBeforeDeduct=balanceBeforeDeduct,
                                                     name=name,
                                                     employeeNoString=employeeNoString)
+        if mode == 'count':
+            # 次数扣款 结果一定成功
+            json_data['ConsumptionEventConfirm'].update(result='success',
+                                                        mode="count",
+                                                        times=times)
+        else:
+            # 金额扣款
+            if handel_ye >= Decimal(totalPayment):
+                result = 'success'
+            else:
+                result = "balanceNotEnough"
+            json_data['ConsumptionEventConfirm'].update(result=result,
+                                                        mode="amount",
+                                                        actualPayment=totalPayment)
         response = self.http_x.put(f"http://{self.ip}/ISAPI/Consume/consumptionEventConfirm", auth=self.auth,
                                    params={'format': 'json'}, json=json_data)
         logger.warning(f'{serialNo}消费事件回执：{response.text}', )
+        
     def _get_device_info(self) -> dict:
         try:
             arr = self.HKWSYGSBQYORM.QueryDeviceInformationByIp(self.ip)
